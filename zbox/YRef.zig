@@ -20,7 +20,7 @@ pub fn attachTo(self: YRef, target: YRef) YRef {
         @panic("This y coordinate is not mutable");
     }
     // TODO bidirectional copy constraints
-    self.state.constrain(self._y, .{ .copy = target._y });
+    self.state.constrain(self._y, .{ .copy = target._y }, "YRef attachTo");
     return self;
 }
 pub fn attachToOffset(self: YRef, target: YRef, offset_y: f64) YRef {
@@ -31,7 +31,7 @@ pub fn attachToOffset(self: YRef, target: YRef, offset_y: f64) YRef {
         .src = target._y,
         .offset = offset_y,
         .scale = 1,
-    }});
+    }}, "YRef attachToOffset");
     return self;
 }
 pub fn attachBetween(self: YRef, a: YRef, b: YRef, f: f64) YRef {

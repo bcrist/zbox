@@ -36,6 +36,7 @@ test "example" {
     const b2 = d.box();
 
     _ = b2.left().attachToOffset(b.right(), 100);
+    _ = b2.bottom().attachTo(b.bottom());
 
 
     const halfway = d.someX().attachBetween(b.right(), b2.left(), 0.5);

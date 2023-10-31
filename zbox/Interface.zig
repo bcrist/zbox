@@ -9,6 +9,16 @@ pub fn push(self: *Interface) *f64 {
     return item;
 }
 
+pub fn flip(self: *Interface) void {
+    const items = self.contents.items;
+    for (0..items.len/2) |i| {
+        const j = items.len - i - 1;
+        const temp = items[i];
+        items[i] = items[j];
+        items[j] = temp;
+    }
+}
+
 pub fn addMissingConstraints(self: *Interface) void {
     // TODO gracefully handle points in contents that aren't uninitalized
     // (take them out of the spacing calculations, etc.)
