@@ -1,12 +1,8 @@
 text: []const u8,
 class: []const u8,
 alignment: Alignment,
-baseline: enum {
-    normal,
-    middle,
-    hanging,
-},
-angle: f64 = 0,
+baseline: Baseline,
+angle: f64,
 _x: f64 = values.uninitialized,
 _y: f64 = values.uninitialized,
 
@@ -14,6 +10,12 @@ pub const Alignment = enum {
     left,
     center,
     right,
+};
+
+pub const Baseline = enum {
+    normal,
+    middle,
+    hanging,
 };
 
 pub fn addMissingConstraints(self: *Label) void {

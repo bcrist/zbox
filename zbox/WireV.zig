@@ -1,4 +1,4 @@
-drawing: *Drawing,
+state: *DrawingState,
 options: wires.Options,
 next: ?*WireH = null,
 _x: f64 = values.uninitialized,
@@ -6,7 +6,7 @@ _y: Span = .{},
 
 pub fn origin(self: *WireV) PointRef {
     return .{
-        .drawing = self.drawing,
+        .state = self.state,
         ._x = self._x,
         ._y = self._y.begin,
     };
@@ -14,7 +14,7 @@ pub fn origin(self: *WireV) PointRef {
 
 pub fn midpoint(self: *WireV) PointRef {
     return .{
-        .drawing = self.drawing,
+        .state = self.state,
         ._x = self._x,
         ._y = self._y.mid,
     };
@@ -22,20 +22,20 @@ pub fn midpoint(self: *WireV) PointRef {
 
 pub fn endpoint(self: *WireV) PointRef {
     return .{
-        .drawing = self.drawing,
+        .state = self.state,
         ._x = self._x,
         ._y = self._y.end,
     };
 }
 
 pub fn length(self: *WireV, len: f64) *WireV {
-    self.drawing.removeConstraint(&self._y.delta);
+    self.state.removeConstraint(&self._y.delta);
     self._y.delta = len;
     return self;
 }
 pub fn matchLengthOf(self: *WireV, other: *const WireV) *WireV {
     // TODO bidirectional copy constraints
-    self.drawing.constrain(&self._y.delta, .{ .copy = &other._y.delta });
+    self.state.constrain(&self._y.delta, .{ .copy = &other._y.delta });
     return self;
 }
 
@@ -44,26 +44,20 @@ pub fn matchLengthOf(self: *WireV, other: *const WireV) *WireV {
 pub fn turn(self: *WireV) *WireH {
     if (self.next) |next| return next;
 
-    const arena = self.drawing.arena.allocator();
-    const item = arena.create(WireH) catch @panic("OOM");
-    item.* = .{
-        .drawing = self.drawing,
-        .options = .{}, // only the first segment holds options
-    };
-    self.next = item;
+    const item = self.state.createWireH(.{}, self);
     // constrain the x coordinates so that the wire will be continuous:
     // TODO bidirectional copy constraints
     if (values.isConstrained(self._x)) {
-        self.drawing.constrain(&item._x.begin, .{ .copy = &self._x }, "wire turn");
+        self.state.constrain(&item._x.begin, .{ .copy = &self._x }, "wire turn");
     } else {
-        self.drawing.constrain(&self._x, .{ .copy = &item._x.begin }, "wire turn");
+        self.state.constrain(&self._x, .{ .copy = &item._x.begin }, "wire turn");
     }
     // Constrain the y coordinates so that the wire will be continuous:
     // TODO bidirectional copy constraints
     if (self._y.isFullyConstrained()) {
-        self.drawing.constrain(&item._y, .{ .copy = &self._y.end }, "wire turn");
+        self.state.constrain(&item._y, .{ .copy = &self._y.end }, "wire turn");
     } else {
-        self.drawing.constrain(&self._y.end, .{ .copy = &item._y }, "wire turn");
+        self.state.constrain(&self._y.end, .{ .copy = &item._y }, "wire turn");
     }
     return item;
 }
@@ -75,7 +69,7 @@ pub fn turnAt(self: *WireV, y: YRef) *WireH {
 
 pub fn endAt(self: *WireV, y: YRef) *WireV {
     // TODO bidirectional copy constraints
-    self.drawing.constrain(&self._y.end, .{ .copy = y._y }, "wire endAt");
+    self.state.constrain(&self._y.end, .{ .copy = y._y }, "wire endAt");
     return self;
 }
 
@@ -83,9 +77,9 @@ pub fn endAtPoint(self: *WireV, end: PointRef) *WireV {
     _ = self.endAt(end.y());
     // TODO bidirectional copy constraints
     if (values.isConstrained(self._x)) {
-        self.drawing.constrain(&end._x, .{ .copy = &self._x }, "wire endAtPoint");
+        self.state.constrain(&end._x, .{ .copy = &self._x }, "wire endAtPoint");
     } else {
-        self.drawing.constrain(&self._x, .{ .copy = &end._x }, "wire endAtPoint");
+        self.state.constrain(&self._x, .{ .copy = &end._x }, "wire endAtPoint");
     }
     return self;
 }
@@ -99,7 +93,7 @@ pub fn addMissingConstraints(self: *WireV) void {
         self._x = 0;
     }
 
-    self._y.addMissingConstraints(self.drawing, 0, self.drawing.style.default_wire_length);
+    self._y.addMissingConstraints(self.state, 0, self.state.drawing.style.default_wire_length);
 }
 
 pub fn debug(self: *WireV, writer: anytype) !void {
@@ -116,7 +110,7 @@ const PointRef = @import("PointRef.zig");
 const XRef = @import("XRef.zig");
 const YRef = @import("YRef.zig");
 const Span = @import("Span.zig");
-const Drawing = @import("Drawing.zig");
+const DrawingState = @import("DrawingState.zig");
 const wires = @import("wires.zig");
 const values = @import("values.zig");
 const std = @import("std");

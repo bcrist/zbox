@@ -1,8 +1,15 @@
+state: *DrawingState,
 contents: std.ArrayListUnmanaged(*f64) = .{},
 spacing: f64 = values.uninitialized,
 span: Span = .{},
 
-pub fn addMissingConstraints(self: *Interface, drawing: *Drawing) void {
+pub fn push(self: *Interface) *f64 {
+    const item = self.state.createValue(values.uninitialized);
+    self.contents.append(self.state.gpa, item) catch @panic("OOM");
+    return item;
+}
+
+pub fn addMissingConstraints(self: *Interface) void {
     // TODO gracefully handle points in contents that aren't uninitalized
     // (take them out of the spacing calculations, etc.)
     // then they can be allowed to be mutable in XRefs/YRefs/PointRefs
@@ -13,7 +20,7 @@ pub fn addMissingConstraints(self: *Interface, drawing: *Drawing) void {
     const spaces_f64: f64 = @floatFromInt(spaces);
 
     if (!values.isUninitialized(self.spacing)) {
-        drawing.constrain(&self.span.delta, .{ .offset_and_scale = .{
+        self.state.constrain(&self.span.delta, .{ .offset_and_scale = .{
             .src = &self.spacing,
             .offset = 0,
             .scale = spaces_f64,
@@ -32,7 +39,7 @@ pub fn addMissingConstraints(self: *Interface, drawing: *Drawing) void {
         }
     } else {
         const divisor: f64 = if (spaces == 0) 1 else spaces_f64;
-        drawing.constrain(&self.spacing, .{ .offset_and_scale = .{
+        self.state.constrain(&self.spacing, .{ .offset_and_scale = .{
             .src = &self.span.delta,
             .offset = 0,
             .scale = 1 / divisor,
@@ -41,13 +48,13 @@ pub fn addMissingConstraints(self: *Interface, drawing: *Drawing) void {
 
     for (0.., self.contents.items) |i, ptr| {
         const k: f64 = @floatFromInt(i);
-        drawing.constrain(ptr, .{ .scaled_offset = .{
+        self.state.constrain(ptr, .{ .scaled_offset = .{
             .operands = .{ &self.span.begin, &self.spacing },
             .k = k,
         }}, "interface item from span begin/spacing");
     }
 
-    self.span.addMissingConstraints(drawing, 0, drawing.style.default_interface_spacing * spaces_f64);
+    self.span.addMissingConstraints(self.state, 0, self.state.drawing.style.default_interface_spacing * spaces_f64);
 }
 
 pub fn debug(self: *Interface, writer: anytype) !void {
@@ -58,6 +65,6 @@ pub fn debug(self: *Interface, writer: anytype) !void {
 
 const Interface = @This();
 const Span = @import("Span.zig");
-const Drawing = @import("Drawing.zig");
+const DrawingState = @import("DrawingState.zig");
 const values = @import("values.zig");
 const std = @import("std");

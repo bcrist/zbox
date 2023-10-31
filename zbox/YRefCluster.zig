@@ -1,21 +1,17 @@
-drawing: *Drawing,
-interface: Interface = .{},
+interface: Interface,
 
 pub fn get(self: *YRefCluster, index: usize) YRef {
     return .{
-        .drawing = self.drawing,
+        .state = self.interface.state,
         ._y = self.interface.contents.items[index],
         .mut = false,
     };
 }
 
-pub fn add(self: *YRefCluster) YRef {
-    const arena = self.drawing.arena.allocator();
-    const item = arena.create(f64) catch @panic("OOM");
-    item.* = values.uninitialized;
-    self.interface.contents.append(self.drawing.gpa, item) catch @panic("OOM");
+pub fn push(self: *YRefCluster) YRef {
+    const item = self.interface.push();
     return .{
-        .drawing = self.drawing,
+        .state = self.interface.state,
         ._y = item,
         .mut = false,
     };
@@ -24,6 +20,5 @@ pub fn add(self: *YRefCluster) YRef {
 const YRefCluster = @This();
 const YRef = @import("YRef.zig");
 const Interface = @import("Interface.zig");
-const Drawing = @import("Drawing.zig");
-const values = @import("values.zig");
+const DrawingState = @import("DrawingState.zig");
 const std = @import("std");

@@ -1,85 +1,37 @@
-// TODO move state to State struct
-
-gpa: std.mem.Allocator,
-arena: std.heap.ArenaAllocator = std.heap.ArenaAllocator.init(std.heap.page_allocator),
-
-constraints: ShallowAutoHashMapUnmanaged(*f64, Constraint) = .{},
-
-labels: std.ArrayListUnmanaged(*Label) = .{},
-boxes: std.ArrayListUnmanaged(*Box) = .{},
-wires_h: std.ArrayListUnmanaged(*WireH) = .{},
-wires_v: std.ArrayListUnmanaged(*WireV) = .{},
-x_ref_clusters: std.ArrayListUnmanaged(*XRefCluster) = .{},
-y_ref_clusters: std.ArrayListUnmanaged(*YRefCluster) = .{},
-loose_values: std.ArrayListUnmanaged(*f64) = .{},
-interfaces: std.ArrayListUnmanaged(*Interface) = .{},
-
+state: DrawingState,
 style: Style = .{},
-
 title: []const u8 = "",
 desc: []const u8 = "",
 
 pub fn init(gpa: std.mem.Allocator) *Drawing {
     const self = gpa.create(Drawing) catch @panic("OOM");
-    self.* = .{ .gpa = gpa };
+    self.* = .{ .state = .{
+        .drawing = self,
+        .gpa = gpa,
+    }};
     return self;
 }
-
 pub fn deinit(self: *Drawing) void {
-    for (self.interfaces.items) |interface| {
-        interface.contents.deinit(self.gpa);
-    }
-
-    self.interfaces.deinit(self.gpa);
-    self.loose_values.deinit(self.gpa);
-    self.y_ref_clusters.deinit(self.gpa);
-    self.x_ref_clusters.deinit(self.gpa);
-    self.wires_v.deinit(self.gpa);
-    self.wires_h.deinit(self.gpa);
-    self.boxes.deinit(self.gpa);
-    self.labels.deinit(self.gpa);
-    self.constraints.deinit(self.gpa);
-
-    self.arena.deinit();
-    self.gpa.destroy(self);
+    const gpa = self.state.gpa;
+    self.state.deinit();
+    gpa.destroy(self);
 }
 
 pub fn box(self: *Drawing) *Box {
-    const arena = self.arena.allocator();
-    const item = arena.create(Box) catch @panic("OOM");
-    item.* = .{
-        .drawing = self,
-        .class = self.style.default_box_class,
-    };
-    self.boxes.append(self.gpa, item) catch @panic("OOM");
-    return item;
+    return self.state.createBox(self.style.default_box_class);
 }
-
 pub fn columns(self: *Drawing) *XRefCluster {
-    const arena = self.arena.allocator();
-    const item = arena.create(XRefCluster) catch @panic("OOM");
-    item.* = .{
-        .drawing = self,
-    };
-    self.x_ref_clusters.append(self.gpa, item) catch @panic("OOM");
-    return item;
+    return self.state.createXRefCluster();
 }
-
 pub fn rows(self: *Drawing) *YRefCluster {
-    const arena = self.arena.allocator();
-    const item = arena.create(YRefCluster) catch @panic("OOM");
-    item.* = .{
-        .drawing = self,
-    };
-    self.y_ref_clusters.append(self.gpa, item) catch @panic("OOM");
-    return item;
+    return self.state.createYRefCluster();
 }
 
 pub fn at(self: *Drawing, abs_x: f64, abs_y: f64) PointRef {
     return .{
-        .drawing = self,
-        ._x = self.createValue(abs_x),
-        ._y = self.createValue(abs_y),
+        .state = &self.state,
+        ._x = self.state.createValue(abs_x),
+        ._y = self.state.createValue(abs_y),
         .mut_x = false,
         .mut_y = false,
     };
@@ -87,9 +39,9 @@ pub fn at(self: *Drawing, abs_x: f64, abs_y: f64) PointRef {
 
 pub fn point(self: *Drawing) PointRef {
     return .{
-        .drawing = self,
-        ._x = self.createValue(values.uninitialized),
-        ._y = self.createValue(values.uninitialized),
+        .state = &self.state,
+        ._x = self.state.createValue(values.uninitialized),
+        ._y = self.state.createValue(values.uninitialized),
         .mut_x = true,
         .mut_y = true,
     };
@@ -97,47 +49,39 @@ pub fn point(self: *Drawing) PointRef {
 
 pub fn x(self: *Drawing, abs_x: f64) XRef {
     return .{
-        .drawing = self,
-        ._x = self.createValue(abs_x),
+        .state = &self.state,
+        ._x = self.state.createValue(abs_x),
         .mut = false,
     };
 }
 
 pub fn someX(self: *Drawing) XRef {
     return .{
-        .drawing = self,
-        ._x = self.createValue(values.uninitialized),
+        .state = &self.state,
+        ._x = self.state.createValue(values.uninitialized),
         .mut = true,
     };
 }
 
 pub fn y(self: *Drawing, abs_y: f64) YRef {
     return .{
-        .drawing = self,
-        ._y = self.createValue(abs_y),
+        .state = &self.state,
+        ._y = self.state.createValue(abs_y),
         .mut = false,
     };
 }
 
 pub fn someY(self: *Drawing) YRef {
     return .{
-        .drawing = self,
-        ._y = self.createValue(values.uninitialized),
+        .state = &self.state,
+        ._y = self.state.createValue(values.uninitialized),
         .mut = true,
     };
 }
 
-fn createValue(self: *Drawing, initial: f64) *f64 {
-    const arena = self.arena.allocator();
-    var item = arena.create(f64) catch @panic("OOM");
-    item.* = initial;
-    self.loose_values.append(self.gpa, item) catch @panic("OOM");
-    return item;
-}
-
 pub fn renderSvg(self: *Drawing, writer: anytype) !void {
-    self.addMissingConstraints();
-    try self.resolveConstraints();
+    self.state.addMissingConstraints();
+    try self.state.resolveConstraints();
 
     try writer.print(
         \\<svg viewBox="{d} {d} {d} {d}" xmlns="http://www.w3.org/2000/svg">
@@ -171,14 +115,14 @@ pub fn renderSvg(self: *Drawing, writer: anytype) !void {
     }
 
     // TODO use paths for wires, add wire corner radius to style
-    for (self.wires_h.items) |w| {
+    for (self.state.wires_h.items) |w| {
         try self.renderSvgWireH(w, true, w.options, writer);
     }
-    for (self.wires_v.items) |w| {
+    for (self.state.wires_v.items) |w| {
         try self.renderSvgWireV(w, true, w.options, writer);
     }
 
-    for (self.boxes.items) |b| {
+    for (self.state.boxes.items) |b| {
         try writer.print(
             \\<rect x="{d}" y="{d}" width="{d}" height="{d}" class="{s}"/>
             \\
@@ -189,7 +133,7 @@ pub fn renderSvg(self: *Drawing, writer: anytype) !void {
         });
     }
 
-    for (self.labels.items) |l| {
+    for (self.state.labels.items) |l| {
         try writer.print(
             \\<text x="{d}" y="{d}" text-anchor="{s}" dominant-baseline="{s}"
         , .{
@@ -299,99 +243,8 @@ fn renderSvgArrowhead(self: *Drawing, x0: f64, y0: f64, x1: f64, y1: f64, class:
     });
 }
 
-fn addMissingConstraints(self: *Drawing) void {
-    for (self.wires_h.items) |w| {
-        w.addMissingConstraints();
-    }
-    for (self.wires_v.items) |w| {
-        w.addMissingConstraints();
-    }
-
-    for (self.boxes.items) |b| {
-        b.addMissingConstraints();
-    }
-
-    for (self.labels.items) |l| {
-        l.addMissingConstraints();
-    }
-
-    for (self.x_ref_clusters.items) |c| {
-        c.interface.addMissingConstraints(self);
-    }
-    for (self.y_ref_clusters.items) |c| {
-        c.interface.addMissingConstraints(self);
-    }
-
-    for (self.loose_values.items) |v| {
-        if (values.isUninitialized(v.*)) {
-            v.* = 0;
-        }
-    }
-}
-
-fn resolveConstraints(self: *Drawing) !void {
-    var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
-    defer arena.deinit();
-    var a = arena.allocator();
-
-    var constraints = a.alloc(Constraint, self.constraints.size) catch @panic("OOM");
-    var i: usize = 0;
-    var iter = self.constraints.valueIterator();
-    while (iter.next()) |ptr| {
-        constraints[i] = ptr.*;
-        i += 1;
-    }
-    std.debug.assert(i == constraints.len);
-
-    try kahn.sort(a, constraints);
-
-    for (constraints) |constraint| {
-        std.debug.assert(values.isConstrained(constraint.dest.*));
-        constraint.dest.* = constraint.op.compute();
-    }
-}
-
-/// Don't use this directly unless you know what you're doing!
-pub fn constrain(self: *Drawing, val: *f64, op: Constraint.Op, debug_text: []const u8) void {
-    const new_op = op.clone(self.arena.allocator());
-    self.constraints.put(self.gpa, val, .{
-        .dest = val,
-        .op = new_op,
-        .debug = debug_text,
-    }) catch @panic("OOM");
-    std.debug.assert(values.isUninitialized(val.*));
-    val.* = values.constrained;
-}
-
-pub fn removeConstraint(self: *Drawing, val: *f64) void {
-    _ = self.constraints.remove(val);
-}
-
-pub fn debug(self: *Drawing, writer: anytype) !void {
-    for (self.x_ref_clusters.items) |c| {
-        try c.debug(writer);
-    }
-    for (self.y_ref_clusters.items) |c| {
-        try c.debug(writer);
-    }
-
-     for (self.wires_h.items) |w| {
-        try w.debug(writer);
-    }
-    for (self.wires_v.items) |w| {
-        try w.debug(writer);
-    }
-
-    for (self.boxes.items) |b| {
-        try b.debug(writer);
-    }
-
-    for (self.labels.items) |l| {
-        try l.debug(writer);
-    }
-}
-
 const Drawing = @This();
+const DrawingState = @import("DrawingState.zig");
 const PointRef = @import("PointRef.zig");
 const XRef = @import("XRef.zig");
 const YRef = @import("YRef.zig");
@@ -405,7 +258,5 @@ const Interface = @import("Interface.zig");
 const Label = @import("Label.zig");
 const Constraint = @import("Constraint.zig");
 const Style = @import("Style.zig");
-const kahn = @import("kahn.zig");
 const values = @import("values.zig");
-const ShallowAutoHashMapUnmanaged = @import("deep_hash_map").ShallowAutoHashMapUnmanaged;
 const std = @import("std");

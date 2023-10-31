@@ -19,48 +19,48 @@ pub fn isFullyConstrained(self: Span) bool {
     return uninitialized_count <= 2;
 }
 
-pub fn addMissingConstraints(self: *Span, drawing: *Drawing, default_mid: f64, default_delta: f64) void {
+pub fn addMissingConstraints(self: *Span, state: *DrawingState, default_mid: f64, default_delta: f64) void {
     if (!values.isUninitialized(self.begin)) {
         if (!values.isUninitialized(self.end)) {
-            self.defaultMid(drawing);
-            self.defaultDelta(drawing);
+            self.defaultMid(state);
+            self.defaultDelta(state);
         } else if (!values.isUninitialized(self.mid)) {
-            drawing.constrain(&self.end, .{ .lerp = .{ .operands = .{ &self.begin, &self.mid }, .k = 2 }}, "span end from begin/mid");
-            self.defaultDelta(drawing);
+            state.constrain(&self.end, .{ .lerp = .{ .operands = .{ &self.begin, &self.mid }, .k = 2 }}, "span end from begin/mid");
+            self.defaultDelta(state);
         } else {
             if (values.isUninitialized(self.delta)) self.delta = default_delta;
-            drawing.constrain(&self.end, .{ .sum2 = .{ &self.begin, &self.delta }}, "span end from begin/delta");
-            self.defaultMid(drawing);
+            state.constrain(&self.end, .{ .sum2 = .{ &self.begin, &self.delta }}, "span end from begin/delta");
+            self.defaultMid(state);
         }
     } else if (!values.isUninitialized(self.end)) {
         if (!values.isUninitialized(self.mid)) {
-            drawing.constrain(&self.begin, .{ .lerp = .{ .operands = .{ &self.end, &self.mid }, .k = 2 }}, "span begin from end/mid");
-            self.defaultDelta(drawing);
+            state.constrain(&self.begin, .{ .lerp = .{ .operands = .{ &self.end, &self.mid }, .k = 2 }}, "span begin from end/mid");
+            self.defaultDelta(state);
         } else {
             if (values.isUninitialized(self.delta)) self.delta = default_delta;
-            drawing.constrain(&self.begin, .{ .difference = .{ &self.end, &self.delta }}, "span begin from end/delta");
-            self.defaultMid(drawing);
+            state.constrain(&self.begin, .{ .difference = .{ &self.end, &self.delta }}, "span begin from end/delta");
+            self.defaultMid(state);
         }
     } else {
         if (values.isUninitialized(self.mid)) self.mid = default_mid;
         if (values.isUninitialized(self.delta)) self.delta = default_delta;
-        drawing.constrain(&self.begin, .{ .scaled_offset = .{ .operands = .{ &self.mid, &self.delta }, .k = -0.5 }}, "span begin from mid/delta");
-        drawing.constrain(&self.end, .{ .scaled_offset = .{ .operands = .{ &self.mid, &self.delta }, .k = 0.5 }}, "span end from mid/delta");
+        state.constrain(&self.begin, .{ .scaled_offset = .{ .operands = .{ &self.mid, &self.delta }, .k = -0.5 }}, "span begin from mid/delta");
+        state.constrain(&self.end, .{ .scaled_offset = .{ .operands = .{ &self.mid, &self.delta }, .k = 0.5 }}, "span end from mid/delta");
     }
 
-    drawing.constrain(&self.min, .{ .min2 = .{ &self.begin, &self.end }}, "span min from begin/end");
-    drawing.constrain(&self.max, .{ .max2 = .{ &self.begin, &self.end }}, "span max from begin/end");
-    drawing.constrain(&self.len, .{ .difference = .{ &self.max, &self.min }}, "span len from max/min");
+    state.constrain(&self.min, .{ .min2 = .{ &self.begin, &self.end }}, "span min from begin/end");
+    state.constrain(&self.max, .{ .max2 = .{ &self.begin, &self.end }}, "span max from begin/end");
+    state.constrain(&self.len, .{ .difference = .{ &self.max, &self.min }}, "span len from max/min");
 }
 
-fn defaultDelta(self: *Span, drawing: *Drawing) void {
-    drawing.constrain(&self.delta, .{
+fn defaultDelta(self: *Span, state: *DrawingState) void {
+    state.constrain(&self.delta, .{
         .difference = .{ &self.end, &self.begin },
     }, "default span delta");
 }
 
-fn defaultMid(self: *Span, drawing: *Drawing) void {
-    drawing.constrain(&self.mid, .{
+fn defaultMid(self: *Span, state: *DrawingState) void {
+    state.constrain(&self.mid, .{
         .midpoint = .{ &self.begin, &self.end },
     }, "default span mid");
 }
@@ -74,6 +74,6 @@ pub fn debug(self: *Span, writer: anytype) !void {
 
 
 const Span = @This();
-const Drawing = @import("Drawing.zig");
+const DrawingState = @import("DrawingState.zig");
 const values = @import("values.zig");
 const std = @import("std");
