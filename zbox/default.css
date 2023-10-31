@@ -1,0 +1,40 @@
+svg {
+    background: #111;
+}
+
+text {
+    display: block;
+    white-space-collapse: preserve;
+    text-wrap: nowrap;
+    font-size: 14px;
+    font-family: Iosevka Custom, Iosevka, Inconsolata, Consolas, monospace;
+    fill: #ccc;
+}
+
+.box_label {
+    font-size: 25px;
+}
+
+.box {
+    stroke-width: 3;
+    stroke: #caa;
+    fill: #321;
+    rx: 5;
+    ry: 5;
+}
+
+.wire {
+    stroke-width: 2;
+    stroke: #aca;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;
+}
+
+.bus {
+    stroke-width: 4;
+    stroke: #66e;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;
+}
