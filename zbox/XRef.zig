@@ -1,6 +1,6 @@
 state: *DrawingState,
 _x: *f64,
-mut: bool,
+mut: bool = true,
 
 pub fn anchorAt(self: XRef, abs_x: f64) XRef {
     if (!self.mut) {

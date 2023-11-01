@@ -54,8 +54,6 @@ pub fn point(self: *Drawing) PointRef {
         .state = &self.state,
         ._x = self.state.createValue(values.uninitialized),
         ._y = self.state.createValue(values.uninitialized),
-        .mut_x = true,
-        .mut_y = true,
     };
 }
 
@@ -71,7 +69,6 @@ pub fn someX(self: *Drawing) XRef {
     return .{
         .state = &self.state,
         ._x = self.state.createValue(values.uninitialized),
-        .mut = true,
     };
 }
 
@@ -87,7 +84,6 @@ pub fn someY(self: *Drawing) YRef {
     return .{
         .state = &self.state,
         ._y = self.state.createValue(values.uninitialized),
-        .mut = true,
     };
 }
 

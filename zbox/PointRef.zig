@@ -1,8 +1,8 @@
 state: *DrawingState,
 _x: *f64,
 _y: *f64,
-mut_x: bool,
-mut_y: bool,
+mut_x: bool = true,
+mut_y: bool = true,
 
 pub fn anchorAt(self: PointRef, abs_x: f64, abs_y: f64) PointRef {
     if (!self.mut_x or !self.mut_y) {

@@ -9,7 +9,6 @@ pub fn y(self: *WireH) YRef {
     return .{
         .state = self.state,
         ._y = &self._y,
-        .mut = true,
     };
 }
 
@@ -18,8 +17,6 @@ pub fn origin(self: *WireH) PointRef {
         .state = self.state,
         ._x = self._x.begin,
         ._y = self._y,
-        .mut_x = true,
-        .mut_y = true,
     };
 }
 
@@ -28,8 +25,6 @@ pub fn midpoint(self: *WireH) PointRef {
         .state = self.state,
         ._x = self._x.mid,
         ._y = self._y,
-        .mut_x = true,
-        .mut_y = true,
     };
 }
 
@@ -38,8 +33,6 @@ pub fn endpoint(self: *WireH) PointRef {
         .state = self.state,
         ._x = self._x.end,
         ._y = self._y,
-        .mut_x = true,
-        .mut_y = true,
     };
 }
 

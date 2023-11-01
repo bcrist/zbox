@@ -39,15 +39,11 @@ pub const WireRef = union(enum) {
                 .state = w.state,
                 ._x = &w._x.begin,
                 ._y = &w._y,
-                .mut_x = true,
-                .mut_y = true,
             },
             .V => |w| .{
                 .state = w.state,
                 ._x = &w._x,
                 ._y = &w._y.begin,
-                .mut_x = true,
-                .mut_y = true,
             },
         };
     }
@@ -58,15 +54,11 @@ pub const WireRef = union(enum) {
                 .state = w.state,
                 ._x = &w._x.end,
                 ._y = &w._y,
-                .mut_x = true,
-                .mut_y = true,
             },
             .V => |w| .{
                 .state = w.state,
                 ._x = &w._x,
                 ._y = &w._y.end,
-                .mut_x = true,
-                .mut_y = true,
             },
         };
     }

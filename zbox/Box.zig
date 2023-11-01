@@ -10,28 +10,24 @@ _b: ?*Interface = null,
 pub fn left(self: *Box) XRef {
     return .{
         .state = self.state,
-        .mut = true,
         ._x = &self._x.begin,
     };
 }
 pub fn right(self: *Box) XRef {
     return .{
         .state = self.state,
-        .mut = true,
         ._x = &self._x.end,
     };
 }
 pub fn top(self: *Box) YRef {
     return .{
         .state = self.state,
-        .mut = true,
         ._y = &self._y.begin,
     };
 }
 pub fn bottom(self: *Box) YRef {
     return .{
         .state = self.state,
-        .mut = true,
         ._y = &self._y.end,
     };
 }
@@ -39,8 +35,6 @@ pub fn bottom(self: *Box) YRef {
 pub fn topLeft(self: *Box) PointRef {
     return .{
         .state = self.state,
-        .mut_x = true,
-        .mut_y = true,
         ._x = &self._x.begin,
         ._y = &self._y.begin,
     };
@@ -48,8 +42,6 @@ pub fn topLeft(self: *Box) PointRef {
 pub fn topCenter(self: *Box) PointRef {
     return .{
         .state = self.state,
-        .mut_x = true,
-        .mut_y = true,
         ._x = &self._x.mid,
         ._y = &self._y.begin,
     };
@@ -57,8 +49,6 @@ pub fn topCenter(self: *Box) PointRef {
 pub fn topRight(self: *Box) PointRef {
     return .{
         .state = self.state,
-        .mut_x = true,
-        .mut_y = true,
         ._x = &self._x.end,
         ._y = &self._y.begin,
     };
@@ -66,8 +56,6 @@ pub fn topRight(self: *Box) PointRef {
 pub fn middleLeft(self: *Box) PointRef {
     return .{
         .state = self.state,
-        .mut_x = true,
-        .mut_y = true,
         ._x = &self._x.begin,
         ._y = &self._y.mid,
     };
@@ -75,8 +63,6 @@ pub fn middleLeft(self: *Box) PointRef {
 pub fn middleCenter(self: *Box) PointRef {
     return .{
         .state = self.state,
-        .mut_x = true,
-        .mut_y = true,
         ._x = &self._x.mid,
         ._y = &self._y.mid,
     };
@@ -84,8 +70,6 @@ pub fn middleCenter(self: *Box) PointRef {
 pub fn middleRight(self: *Box) PointRef {
     return .{
         .state = self.state,
-        .mut_x = true,
-        .mut_y = true,
         ._x = &self._x.end,
         ._y = &self._y.mid,
     };
@@ -93,8 +77,6 @@ pub fn middleRight(self: *Box) PointRef {
 pub fn bottomLeft(self: *Box) PointRef {
     return .{
         .state = self.state,
-        .mut_x = true,
-        .mut_y = true,
         ._x = &self._x.begin,
         ._y = &self._y.end,
     };
@@ -102,8 +84,6 @@ pub fn bottomLeft(self: *Box) PointRef {
 pub fn bottomCenter(self: *Box) PointRef {
     return .{
         .state = self.state,
-        .mut_x = true,
-        .mut_y = true,
         ._x = &self._x.mid,
         ._y = &self._y.end,
     };
@@ -111,8 +91,6 @@ pub fn bottomCenter(self: *Box) PointRef {
 pub fn bottomRight(self: *Box) PointRef {
     return .{
         .state = self.state,
-        .mut_x = true,
-        .mut_y = true,
         ._x = &self._x.end,
         ._y = &self._y.end,
     };
@@ -202,8 +180,6 @@ pub fn leftSideWithClass(self: *Box, class: []const u8, text: []const u8) PointR
         .state = self.state,
         ._x = &self._x.begin,
         ._y = y,
-        .mut_x = false,
-        .mut_y = false,
     };
 }
 
@@ -221,8 +197,6 @@ pub fn rightSideWithClass(self: *Box, class: []const u8, text: []const u8) Point
         .state = self.state,
         ._x = &self._x.end,
         ._y = y,
-        .mut_x = false,
-        .mut_y = false,
     };
 }
 
@@ -241,8 +215,6 @@ pub fn topSideWithClass(self: *Box, class: []const u8, text: []const u8) PointRe
         .state = self.state,
         ._x = x,
         ._y = &self._y.begin,
-        .mut_x = false,
-        .mut_y = false,
     };
 }
 
@@ -261,8 +233,6 @@ pub fn bottomSideWithClass(self: *Box, class: []const u8, text: []const u8) Poin
         .state = self.state,
         ._x = x,
         ._y = &self._y.end,
-        .mut_x = false,
-        .mut_y = false,
     };
 }
 

@@ -31,7 +31,7 @@ test "example" {
 
     const b2 = d.box();
 
-    _ = b2.left().attachToOffset(b.right(), 100);
+    _ = b2.left().attachToOffset(b.right(), 150);
     _ = b2.bottom().attachTo(b.bottom());
 
 
@@ -58,9 +58,6 @@ test "example" {
     _ = b2.leftSide("X")
         .wireH(.{})
         .bitMark()
-        .endAtMutablePoint(b.rightSide("X"));
-    _ = b2.leftSide("X")
-        .wireH(.{})
         .endAtMutablePoint(b.rightSide("X"));
 
     cols.interface.flip();

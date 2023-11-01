@@ -1,3 +1,5 @@
+// TODO consider alternative names for this struct that are more descriptive
+
 state: *DrawingState,
 contents: std.ArrayListUnmanaged(*f64) = .{},
 spacing: f64 = values.uninitialized,
@@ -20,11 +22,12 @@ pub fn flip(self: *Interface) void {
 }
 
 pub fn addMissingConstraints(self: *Interface) void {
-    // TODO gracefully handle points in contents that aren't uninitalized
-    // (take them out of the spacing calculations, etc.)
-    // then they can be allowed to be mutable in XRefs/YRefs/PointRefs
-
-    var spaces = self.contents.items.len;
+    var spaces: usize = 0;
+    for (self.contents.items) |item| {
+        if (values.isUninitialized(item.*)) {
+            spaces += 1;
+        }
+    }
     if (spaces > 0) spaces -= 1;
 
     const spaces_f64: f64 = @floatFromInt(spaces);
@@ -48,9 +51,12 @@ pub fn addMissingConstraints(self: *Interface) void {
         }
     }
 
-    for (0.., self.contents.items) |i, ptr| {
-        const k: f64 = @floatFromInt(i);
-        self.state.constrainScaledOffset(ptr, &self.span.begin, &self.spacing, k, "interface item from span begin/spacing");
+    var i: f64 = 0;
+    for (self.contents.items) |ptr| {
+        if (values.isUninitialized(ptr.*)) {
+            self.state.constrainScaledOffset(ptr, &self.span.begin, &self.spacing, i, "interface item from span begin/spacing");
+            i += 1;
+        }
     }
 
     self.span.addMissingConstraints(self.state, 0, self.state.drawing.style.default_interface_spacing * spaces_f64);

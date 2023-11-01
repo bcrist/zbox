@@ -1,6 +1,6 @@
 state: *DrawingState,
 _y: *f64,
-mut: bool,
+mut: bool = true,
 
 pub fn anchorAt(self: YRef, abs_y: f64) YRef {
     if (!self.mut) {
