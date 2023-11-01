@@ -15,24 +15,24 @@ pub fn y(self: *WireH) YRef {
 pub fn origin(self: *WireH) PointRef {
     return .{
         .state = self.state,
-        ._x = self._x.begin,
-        ._y = self._y,
+        ._x = &self._x.begin,
+        ._y = &self._y,
     };
 }
 
 pub fn midpoint(self: *WireH) PointRef {
     return .{
         .state = self.state,
-        ._x = self._x.mid,
-        ._y = self._y,
+        ._x = &self._x.mid,
+        ._y = &self._y,
     };
 }
 
 pub fn endpoint(self: *WireH) PointRef {
     return .{
         .state = self.state,
-        ._x = self._x.end,
-        ._y = self._y,
+        ._x = &self._x.end,
+        ._y = &self._y,
     };
 }
 
@@ -127,6 +127,12 @@ pub fn turnAtOffset(self: *WireH, x: XRef, offset: f64) *WireV {
 
 pub fn turnAndEndAt(self: *WireH, end: PointRef) *WireV {
     return self.turnAt(end.x()).endAt(end.y());
+}
+
+pub fn continueAt(self: *WireH, x: XRef) *WireH {
+    const v_wire = self.turnAt(x);
+    self.state.constrainEql(&v_wire._y.end, &self._y, "continueAt y");
+    return v_wire.turn();
 }
 
 pub fn endAt(self: *WireH, x: XRef) *WireH {

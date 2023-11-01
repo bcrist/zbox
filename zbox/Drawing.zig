@@ -22,6 +22,11 @@ pub fn box(self: *Drawing) *Box {
     return self.state.createBox(self.style.default_box_class);
 }
 
+// TODO cubic beziers - "swoopWest/East/North/South"
+// ends with "endWestAt/EastAt/NorthAt/SouthAt(PointRef)
+
+// TODO Grouping rectangles
+// TODO Circles (for state diagrams)
 // TODO and gates
 // TODO or gates
 // TODO xor gates
@@ -31,6 +36,10 @@ pub fn box(self: *Drawing) *Box {
 // TODO ALU blocks
 // TODO bus interface blocks
 // TODO bus/wire swap block
+// TODO flowchart shapes
+// TODO memory layout/protocol diagrams
+// TODO simple tables
+// TODO railroad diagrams?
 
 pub fn columns(self: *Drawing) *XRefCluster {
     return self.state.createXRefCluster();

@@ -55,7 +55,7 @@ pub const WireStyle = struct {
     label_padding_y: f64,
     label_padding_cap: f64,
     default_length: f64,
-    default_corner_radius: f64, // TODO
+    default_corner_radius: f64, // TODO rounded corners on wires
     arrow_length: f64,
     arrow_width: f64,
     junction_radius: f64,

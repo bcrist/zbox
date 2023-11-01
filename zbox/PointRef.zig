@@ -59,6 +59,18 @@ pub fn y(self: PointRef) YRef {
     };
 }
 
+pub fn offset(self: PointRef, x_offset: f64, y_offset: f64) PointRef {
+    const xv = self.state.createValue(values.uninitialized);
+    const yv = self.state.createValue(values.uninitialized);
+    self.state.constrainOffset(xv, self._x, x_offset, "PointRef x offset");
+    self.state.constrainOffset(yv, self._y, y_offset, "PointRef y offset");
+    return .{
+        .state = self.state,
+        ._x = xv,
+        ._y = yv,
+    };
+}
+
 pub fn wireH(self: PointRef, options: wires.Options) *WireH {
     const item = self.state.createWireH(options, null);
     self.state.constrainEql(&item._x.begin, self._x, "wire begin x");
@@ -79,5 +91,6 @@ const YRef = @import("YRef.zig");
 const WireH = @import("WireH.zig");
 const WireV = @import("WireV.zig");
 const wires = @import("wires.zig");
+const values = @import("values.zig");
 const DrawingState = @import("DrawingState.zig");
 const std = @import("std");

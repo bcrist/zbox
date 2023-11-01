@@ -48,6 +48,16 @@ pub fn intersectionWith(self: YRef, x: XRef) PointRef {
     };
 }
 
+// Note that this creates a new loose value representing the offset location
+pub fn offset(self: YRef, amount: f64) YRef {
+    const y = self.state.createValue(values.uninitialized);
+    self.state.constrainOffset(y, self._y, amount, "YRef offset");
+    return .{
+        .state = self.state,
+        ._y = y,
+    };
+}
+
 pub fn wire(self: YRef, options: wires.Options) *WireV {
     const item = self.state.createWireV(options, null);
     self.state.constrainEql(&item._y.begin, self._y, "wire begin y");
@@ -59,5 +69,6 @@ const XRef = @import("XRef.zig");
 const PointRef = @import("PointRef.zig");
 const WireV = @import("WireV.zig");
 const wires = @import("wires.zig");
+const values = @import("values.zig");
 const DrawingState = @import("DrawingState.zig");
 const std = @import("std");

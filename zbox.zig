@@ -17,12 +17,23 @@ test "example" {
 
     _ = b.rightSide("CLK");
     _ = b.rightSide("D0");
-    _ = b.rightSide("D1");
-    _ = b.rightSide("D2");
     _ = b.rightSide("D3");
     _ = b.rightSide("");
 
-    _ = b.leftSide("asdf");
+    const asdf = b.leftSide("asdf").wireH(.{}).length(-50);
+    _ = asdf.turn()
+        .turnAtOffset(b.top(), -50)
+        .turnAtOffset(b.right(), 50)
+        .turnAndEndAt(b.rightSide("asdf"))
+        ;
+
+    _ = asdf.turn().turn().y()
+        .wire(.{ .dir = .junction_begin })
+        .endAtPoint(b.topSide("asdf"))
+        ;
+
+    
+
     _ = b.topSide("asd");
     _ = b.topSide("asd2");
     _ = b.topSide("asd3");
@@ -55,10 +66,10 @@ test "example" {
         .labelLeft(.left, "D5")
         .turnAndEndAt(b2.leftSide("IN2"));
 
-    _ = b2.leftSide("X")
+    _ = b2.leftSide("aaa")
         .wireH(.{})
         .bitMark()
-        .endAtMutablePoint(b.rightSide("X"));
+        .endAtMutablePoint(b.rightSide("qqq"));
 
     cols.interface.flip();
 
@@ -68,12 +79,19 @@ test "example" {
     const bus = d.point()
         .attachToOffset(b.bottomLeft(), 0, 100)
         .wireH(.{ .bits = 16 })
-        .endAt(b3.right())
+        .bitMark()
         ;
 
-    _ = bus.labelAbove(.left, "Hello");
+    const bus2 = bus.continueAt(b.right()).endAt(b3.right());
+
+    _ = bus.endpoint()
+        .wireV(.{ .bits = 16, .dir = .junction_begin })
+        .turn()
+        .endAtPoint(bus2.endpoint().offset(0, 100));
+
     _ = bus.labelLeft("Hellorld");
-    _ = bus.labelRight("fasdf");
+    _ = bus2.labelAbove(.left, "Hello");
+    _ = bus2.labelRight("fasdf");
 
     _ = bus.y().wire(.{ .dir = .forward }).endAtPoint(b2.bottomSide("ABC"));
     _ = bus.y().wire(.{ .dir = .reverse }).endAtPoint(b2.bottomSide("DEF"));

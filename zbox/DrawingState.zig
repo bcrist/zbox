@@ -22,9 +22,6 @@ loose_values: std.ArrayListUnmanaged(*f64) = .{},
 interfaces: std.ArrayListUnmanaged(*Interface) = .{},
 
 
-// TODO in PointRef: "swoopWest/East/North/South" - cubic bezier lines/arrows
-// ends with "endWestAt/EastAt/NorthAt/SouthAt(PointRef)
-
 pub fn deinit(self: *DrawingState) void {
     for (self.interfaces.items) |interface| {
         interface.contents.deinit(self.gpa);
