@@ -16,46 +16,31 @@ pub fn anchorAt(self: PointRef, abs_x: f64, abs_y: f64) PointRef {
 }
 
 pub fn attach(self: PointRef, other: PointRef) PointRef {
-    other.attachTo(self);
+    _ = other.attachTo(self);
     return self;
 }
 pub fn attachTo(self: PointRef, target: PointRef) PointRef {
     if (!self.mut_x or !self.mut_y) {
         @panic("This point is not mutable");
     }
-    // TODO bidirectional copy constraints
-    self.state.constrain(self._x, .{ .copy = target._x });
-    self.state.constrain(self._y, .{ .copy = target._y });
+    self.state.constrainEql(self._x, target._x, "PointRef attachTo x");
+    self.state.constrainEql(self._y, target._y, "PointRef attachTo y");
     return self;
 }
 pub fn attachToOffset(self: PointRef, target: PointRef, offset_x: f64, offset_y: f64) PointRef {
     if (!self.mut_x or !self.mut_y) {
         @panic("This point is not mutable");
     }
-    self.state.constrain(self._x, .{ .offset_and_scale = .{
-        .src = target._x,
-        .offset = offset_x,
-        .scale = 1,
-    }});
-    self.state.constrain(self._y, .{ .offset_and_scale = .{
-        .src = target._y,
-        .offset = offset_y,
-        .scale = 1,
-    }});
+    self.state.constrainOffset(self._x, target._x, offset_x, "PointRef attachToOffset x");
+    self.state.constrainOffset(self._y, target._y, offset_y, "PointRef attachToOffset y");
     return self;
 }
 pub fn attachBetween(self: PointRef, a: PointRef, b: PointRef, f: f64) PointRef {
     if (!self.mut_x or !self.mut_y) {
         @panic("This point is not mutable");
     }
-    self.state.constrain(self._x, .{ .lerp = .{
-        .operands = .{ a._x, b._x },
-        .k = f,
-    }}, "PointRef x attachBetween");
-    self.state.constrain(self._y, .{ .lerp = .{
-        .operands = .{ a._y, b._y },
-        .k = f,
-    }}, "PointRef y attachBetween");
+    self.state.constrainLerp(self._x, a._x, b._x, f, "PointRef x attachBetween");
+    self.state.constrainLerp(self._y, a._y, b._y, f, "PointRef y attachBetween");
     return self;
 }
 
@@ -76,17 +61,15 @@ pub fn y(self: PointRef) YRef {
 
 pub fn wireH(self: PointRef, options: wires.Options) *WireH {
     const item = self.state.createWireH(options, null);
-    // TODO bidirectional copy constraints
-    self.state.constrain(&item._x.begin, .{ .copy = self._x }, "wire begin x");
-    self.state.constrain(&item._y, .{ .copy = self._y }, "wire y");
+    self.state.constrainEql(&item._x.begin, self._x, "wire begin x");
+    self.state.constrainEql(&item._y, self._y, "wire y");
     return item;
 }
 
 pub fn wireV(self: PointRef, options: wires.Options) *WireV {
     const item = self.state.createWireV(options, null);
-    // TODO bidirectional copy constraints
-    self.state.constrain(&item._x, .{ .copy = self._x }, "wire x");
-    self.state.constrain(&item._y.begin, .{ .copy = self._y }, "wire begin y");
+    self.state.constrainEql(&item._x, self._x, "wire x");
+    self.state.constrainEql(&item._y.begin, self._y, "wire begin y");
     return item;
 }
 

@@ -1,5 +1,29 @@
 interface: Interface,
 
+pub fn top(self: *YRefCluster) YRef {
+    return .{
+        .state = self.interface.state,
+        ._y = &self.interface.span.begin,
+        .mut = true,
+    };
+}
+
+pub fn middle(self: *YRefCluster) YRef {
+    return .{
+        .state = self.interface.state,
+        ._y = &self.interface.span.mid,
+        .mut = true,
+    };
+}
+
+pub fn bottom(self: *YRefCluster) YRef {
+    return .{
+        .state = self.interface.state,
+        ._y = &self.interface.span.end,
+        .mut = true,
+    };
+}
+
 pub fn get(self: *YRefCluster, index: usize) YRef {
     return .{
         .state = self.interface.state,
@@ -15,6 +39,11 @@ pub fn push(self: *YRefCluster) YRef {
         ._y = item,
         .mut = false,
     };
+}
+
+pub fn debug(self: *YRefCluster, writer: anytype) !void {
+    try writer.writeAll("YRefCluster: ");
+    try self.interface.debug(writer);
 }
 
 const YRefCluster = @This();

@@ -1,15 +1,29 @@
 drawing: *Drawing,
 gpa: std.mem.Allocator,
 arena: std.heap.ArenaAllocator = std.heap.ArenaAllocator.init(std.heap.page_allocator),
-constraints: ShallowAutoHashMapUnmanaged(*f64, Constraint) = .{},
+
+constraints: ShallowAutoHashMapUnmanaged(*const f64, Constraint) = .{},
+
 labels: std.ArrayListUnmanaged(*Label) = .{},
+
 boxes: std.ArrayListUnmanaged(*Box) = .{},
+
+// Note only the first segment of each wire is stored here;
+// iterate through the .next chains to find the other segments
 wires_h: std.ArrayListUnmanaged(*WireH) = .{},
 wires_v: std.ArrayListUnmanaged(*WireV) = .{},
+
 x_ref_clusters: std.ArrayListUnmanaged(*XRefCluster) = .{},
 y_ref_clusters: std.ArrayListUnmanaged(*YRefCluster) = .{},
+
 loose_values: std.ArrayListUnmanaged(*f64) = .{},
+
+// note this includes the interfaces inside X/YRefClusters as well
 interfaces: std.ArrayListUnmanaged(*Interface) = .{},
+
+
+// TODO in PointRef: "swoopWest/East/North/South" - cubic bezier lines/arrows
+// ends with "endWestAt/EastAt/NorthAt/SouthAt(PointRef)
 
 pub fn deinit(self: *DrawingState) void {
     for (self.interfaces.items) |interface| {
@@ -176,7 +190,6 @@ pub fn resolveConstraints(self: *DrawingState) !void {
     }
 }
 
-/// Don't use this directly unless you know what you're doing!
 pub fn constrain(self: *DrawingState, val: *f64, op: Constraint.Op, debug_text: []const u8) void {
     const new_op = op.clone(self.arena.allocator());
     self.constraints.put(self.gpa, val, .{
@@ -184,8 +197,46 @@ pub fn constrain(self: *DrawingState, val: *f64, op: Constraint.Op, debug_text: 
         .op = new_op,
         .debug = debug_text,
     }) catch @panic("OOM");
-    std.debug.assert(values.isUninitialized(val.*));
+
     val.* = values.constrained;
+}
+
+pub fn constrainEql(self: *DrawingState, dest: *f64, src: *const f64, debug_text: []const u8) void {
+    self.constrain(dest, .{ .copy = src }, debug_text);
+}
+
+pub fn constrainOffset(self: *DrawingState, dest: *f64, src: *const f64, offset: f64, debug_text: []const u8) void {
+    self.constrain(dest, .{ .offset_and_scale = .{
+        .src = src,
+        .offset = offset,
+        .scale = 1,
+    }}, debug_text);
+}
+
+pub fn constrainScaledOffset(self: *DrawingState, dest: *f64, src: *const f64, offset: *const f64, offset_scale: f64, debug_text: []const u8) void {
+    self.constrain(dest, .{ .scaled_offset = .{
+        .operands = .{ src, offset },
+        .k = offset_scale,
+    }}, debug_text);
+}
+
+pub fn constrainScale(self: *DrawingState, dest: *f64, src: *const f64, scale: f64, debug_text: []const u8) void {
+    self.constrain(dest, .{ .offset_and_scale = .{
+        .src = src,
+        .offset = 0,
+        .scale = scale,
+    }}, debug_text);
+}
+
+pub fn constrainMidpoint(self: *DrawingState, dest: *f64, v0: *const f64, v1: *const f64, debug_text: []const u8) void {
+    self.constrain(dest, .{ .midpoint = .{ v0, v1 }}, debug_text);
+}
+
+pub fn constrainLerp(self: *DrawingState, dest: *f64, v0: *const f64, v1: *const f64, f: f64, debug_text: []const u8) void {
+    self.constrain(dest, .{ .lerp = .{
+        .operands = .{ v0, v1 },
+        .k = f,
+    }}, debug_text);
 }
 
 pub fn removeConstraint(self: *DrawingState, val: *f64) void {

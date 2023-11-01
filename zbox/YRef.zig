@@ -19,29 +19,21 @@ pub fn attachTo(self: YRef, target: YRef) YRef {
     if (!self.mut) {
         @panic("This y coordinate is not mutable");
     }
-    // TODO bidirectional copy constraints
-    self.state.constrain(self._y, .{ .copy = target._y }, "YRef attachTo");
+    self.state.constrainEql(self._y, target._y, "YRef attachTo");
     return self;
 }
 pub fn attachToOffset(self: YRef, target: YRef, offset_y: f64) YRef {
     if (!self.mut) {
         @panic("This y coordinate is not mutable");
     }
-    self.state.constrain(self._y, .{ .offset_and_scale = .{
-        .src = target._y,
-        .offset = offset_y,
-        .scale = 1,
-    }}, "YRef attachToOffset");
+    self.state.constrainOffset(self._y, target._y, offset_y, "YRef attachToOffset");
     return self;
 }
 pub fn attachBetween(self: YRef, a: YRef, b: YRef, f: f64) YRef {
     if (!self.mut) {
         @panic("This y coordinate is not mutable");
     }
-    self.state.constrain(self._y, .{ .lerp = .{
-        .operands = .{ a._y, b._y },
-        .k = f,
-    }}, "YRef attachBetween");
+    self.state.constrainLerp(self._y, a._y, b._y, f, "YRef attachBetween");
     return self;
 }
 
@@ -58,8 +50,7 @@ pub fn intersectionWith(self: YRef, x: XRef) PointRef {
 
 pub fn wire(self: YRef, options: wires.Options) *WireV {
     const item = self.state.createWireV(options, null);
-    // TODO bidirectional copy constraints
-    self.state.constrain(&item._y.begin, .{ .copy = self._y }, "wire begin y");
+    self.state.constrainEql(&item._y.begin, self._y, "wire begin y");
     return item;
 }
 

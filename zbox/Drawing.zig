@@ -2,6 +2,7 @@ state: DrawingState,
 style: Style = .{},
 title: []const u8 = "",
 desc: []const u8 = "",
+view: Viewport = .{},
 
 pub fn init(gpa: std.mem.Allocator) *Drawing {
     const self = gpa.create(Drawing) catch @panic("OOM");
@@ -20,6 +21,17 @@ pub fn deinit(self: *Drawing) void {
 pub fn box(self: *Drawing) *Box {
     return self.state.createBox(self.style.default_box_class);
 }
+
+// TODO and gates
+// TODO or gates
+// TODO xor gates
+// TODO buffers/inverters
+// TODO transmission gates
+// TODO muxes & demuxes
+// TODO ALU blocks
+// TODO bus interface blocks
+// TODO bus/wire swap block
+
 pub fn columns(self: *Drawing) *XRefCluster {
     return self.state.createXRefCluster();
 }
@@ -83,12 +95,20 @@ pub fn renderSvg(self: *Drawing, writer: anytype) !void {
     self.state.addMissingConstraints();
     try self.state.resolveConstraints();
 
+    const computed_view = self.computeViewport();
+    const view: Viewport = .{
+        .left = self.view.left orelse computed_view.left,
+        .right = self.view.right orelse computed_view.right,
+        .top = self.view.top orelse computed_view.top,
+        .bottom = self.view.bottom orelse computed_view.bottom,
+    };
+
     try writer.print(
         \\<svg viewBox="{d} {d} {d} {d}" xmlns="http://www.w3.org/2000/svg">
         \\
     , .{
-        -500, -500, // TODO
-        1000, 1000,
+        view.left orelse 0, view.top orelse 0,
+        view.width(), view.height(),
     });
 
     if (self.title.len > 0) {
@@ -114,12 +134,11 @@ pub fn renderSvg(self: *Drawing, writer: anytype) !void {
         , .{ self.style.css });
     }
 
-    // TODO use paths for wires, add wire corner radius to style
     for (self.state.wires_h.items) |w| {
-        try self.renderSvgWireH(w, true, w.options, writer);
+        try self.renderSvgWire(wires.WireRef.initH(w), writer);
     }
     for (self.state.wires_v.items) |w| {
-        try self.renderSvgWireV(w, true, w.options, writer);
+        try self.renderSvgWire(wires.WireRef.initV(w), writer);
     }
 
     for (self.state.boxes.items) |b| {
@@ -134,113 +153,235 @@ pub fn renderSvg(self: *Drawing, writer: anytype) !void {
     }
 
     for (self.state.labels.items) |l| {
-        try writer.print(
-            \\<text x="{d}" y="{d}" text-anchor="{s}" dominant-baseline="{s}"
-        , .{
-            l._x, l._y,
-            switch (l.alignment) {
-                .left => "start",
-                .center => "middle",
-                .right => "end",
-            },
-            switch (l.baseline) {
-                .normal => "auto",
-                .middle => "middle",
-                .hanging => "hanging",
-            },
-        });
-        if (l.angle != 0) {
-            try writer.print(
-                \\ transform-origin="{d} {d}" transform="rotate({d})"
-            , .{
-                l._x, l._y,
-                l.angle,
-            });
-        }
-        try writer.print(
-            \\ class="{s}">{s}</text>
-            \\
-        , .{
-            l.class,
-            l.text,
-        });
+        try renderSvgLabel(l._x, l._y, l.alignment, l.baseline, l.angle, l.class, "", l.text, writer);
     }
 
     try writer.writeAll("</svg>");
 }
 
-fn renderSvgWireH(self: *Drawing, wire: *WireH, first: bool, options: wires.Options, writer: anytype) @TypeOf(writer).Error!void {
-    var o = options;
-    o.dir = switch (options.dir) {
-        .none => .none,
-        .forward, .junction_end => if (wire.next == null) options.dir else .none,
-        .reverse, .junction_begin => if (first) options.dir else .none,
-        .bidirectional, .junction_both => if (first or wire.next == null) options.dir else .none,
-    };
-    try self.renderSvgLine(wire._x.begin, wire._y, wire._x.end, wire._y, o, writer);
-    if (wire.next) |next| try self.renderSvgWireV(next, false, options, writer);
-}
-fn renderSvgWireV(self: *Drawing, wire: *WireV, first: bool, options: wires.Options, writer: anytype) @TypeOf(writer).Error!void {
-    var o = options;
-    o.dir = switch (options.dir) {
-        .none => .none,
-        .forward, .junction_end => if (wire.next == null) options.dir else .none,
-        .reverse, .junction_begin => if (first) options.dir else .none,
-        .bidirectional, .junction_both => if (first or wire.next == null) options.dir else .none,
-    };
-    try self.renderSvgLine(wire._x, wire._y.begin, wire._x, wire._y.end, o, writer);
-    if (wire.next) |next| try self.renderSvgWireH(next, false, options, writer);
-}
-
-fn renderSvgLine(self: *Drawing, x0: f64, y0: f64, x1: f64, y1: f64, options: wires.Options, writer: anytype) @TypeOf(writer).Error!void {
-    const class = options.class orelse if (options.bits > 1) self.style.default_bus_class else self.style.default_wire_class;
+fn renderSvgLabel(lx: f64, ly: f64, alignment: Label.Alignment, baseline: Label.Baseline, angle: f64, class: []const u8, class2: []const u8, text: []const u8, writer: anytype) @TypeOf(writer).Error!void {
     try writer.print(
-        \\<line x1="{d}" y1="{d}" x2="{d}" y2="{d}" class="{s}"/>
+        \\<text x="{d}" y="{d}" text-anchor="{s}" dominant-baseline="{s}"
+    , .{
+        lx, ly,
+        switch (alignment) {
+            .left => "start",
+            .center => "middle",
+            .right => "end",
+        },
+        switch (baseline) {
+            .normal => "auto",
+            .middle => "middle",
+            .hanging => "hanging",
+        },
+    });
+    if (angle != 0) {
+        try writer.print(
+            \\ transform-origin="{d} {d}" transform="rotate({d})"
+        , .{
+            lx, ly,
+            angle,
+        });
+    }
+    try writer.print(
+        \\ class="{s}{s}">{s}</text>
         \\
     , .{
-        x0, y0,
-        x1, y1,
-        class,
+        class, class2,
+        text,
     });
+}
+
+fn renderSvgWire(self: *Drawing, wire: wires.WireRef, writer: anytype) @TypeOf(writer).Error!void {
+    const options = wire.options();
+    const style = if (options.bits > 1) self.style.bus_style else self.style.wire_style;
+
+    var draw_start_arrow = false;
+    var draw_end_arrow = false;
+    var draw_start_junction = false;
+    var draw_end_junction = false;
+
     switch (options.dir) {
         .none => {},
-        .junction_begin => {}, // TODO
-        .junction_end => {}, // TODO
-        .junction_both => {}, // TODO
-        .forward => try self.renderSvgArrowhead(x0, y0, x1, y1, class, writer),
-        .reverse => try self.renderSvgArrowhead(x1, y1, x0, y0, class, writer),
+        .forward => draw_end_arrow = true,
+        .junction_end => draw_end_junction = true,
+        .reverse => draw_start_arrow = true,
+        .junction_begin => draw_start_junction = true,
         .bidirectional => {
-            try self.renderSvgArrowhead(x0, y0, x1, y1, class, writer);
-            try self.renderSvgArrowhead(x1, y1, x0, y0, class, writer);
+            draw_start_arrow = true;
+            draw_end_arrow = true;
         },
+        .junction_both => {
+            draw_start_junction = true;
+            draw_end_junction = true;
+        },
+    }
+
+    switch (wire) {
+        .H => |w| try writer.print("<path d=\"M {d} {d} H {d}", .{ w._x.begin, w._y, w._x.end }),
+        .V => |w| try writer.print("<path d=\"M {d} {d} V {d}", .{ w._x, w._y.begin, w._y.end }),
+    }
+
+    var iter: wires.Iterator = .{ .wire = wire };
+    _ = iter.next(); // we already processed ourself
+    var final_segment = wire;
+    while (iter.next()) |segment| {
+        final_segment = segment;
+        switch (segment) {
+            .H => |w| try writer.print(" H {d}", .{ w._x.end }),
+            .V => |w| try writer.print(" V {d}", .{ w._y.end }),
+        }
+    }
+
+    if (draw_end_arrow) {
+        const begin = final_segment.begin();
+        const end = final_segment.end();
+        const dx = end._x.* - begin._x.*;
+        const dy = end._y.* - begin._y.*;
+        try renderSvgArrowheadPath(dx, dy, style, writer);
+    }
+
+    if (draw_start_arrow) {
+        const begin = wire.begin();
+        const end = wire.end();
+        const dx = begin._x.* - end._x.*;
+        const dy = begin._y.* - end._y.*;
+        try writer.print(" M {d} {d}", .{ begin._x.*, begin._y.* });
+        try renderSvgArrowheadPath(dx, dy, style, writer);
+    }
+
+    const class = options.class orelse style.default_class;
+
+    try writer.print(
+        \\" class="{s}"/>
+        \\
+    , .{ class });
+
+    iter = .{ .wire = wire };
+    while (iter.next()) |segment| {
+        if (segment.bitMark()) |f| {
+            const begin = segment.begin();
+            const end = segment.end();
+            const cx = (1-f)*begin._x.* + f*end._x.*;
+            const cy = (1-f)*begin._y.* + f*end._y.*;
+
+            const x0 = cx - style.bit_mark_length / 2;
+            const x1 = cx + style.bit_mark_length / 2;
+
+            const y0 = cy + style.bit_mark_length / 2;
+            const y1 = cy - style.bit_mark_length / 2;
+
+            try writer.print(
+                \\<line x1="{d}" y1="{d}" x2="{d}" y2="{d}" class="{s} bitmark"/>
+                \\
+            , .{ x0, y0, x1, y1, class });
+
+            var buf: [64]u8 = undefined;
+            const text = try std.fmt.bufPrint(&buf, "{}", .{ options.bits });
+
+            switch (segment) {
+                .H => try renderSvgLabel(cx, cy + style.bit_mark_label_offset_y, .center, .hanging, 0, class, " bitmark", text, writer),
+                .V => try renderSvgLabel(cx + style.bit_mark_label_offset_x, cy + style.bit_mark_label_offset_xy, .left, .middle, 0, class, " bitmark", text, writer),
+            }
+        }
+    }
+
+    if (draw_start_junction) {
+        const begin = wire.begin();
+        try writer.print(
+            \\<circle cx="{d}" cy="{d}" r="{d}" class="{s} junction"/>
+            \\
+        , .{ begin._x.*, begin._y.*, style.junction_radius, class });
+    }
+
+    if (draw_end_junction) {
+        const end = final_segment.end();
+        try writer.print(
+            \\<circle cx="{d}" cy="{d}" r="{d}" class="{s} junction"/>
+            \\
+        , .{ end._x.*, end._y.*, style.junction_radius, class });
     }
 }
 
-fn renderSvgArrowhead(self: *Drawing, x0: f64, y0: f64, x1: f64, y1: f64, class: []const u8, writer: anytype) @TypeOf(writer).Error!void {
-    const dx = x1 - x0;
-    const dy = y1 - y0;
-    const length = @sqrt(dx * dx + dy * dy);
+fn renderSvgArrowheadPath(dx: f64, dy: f64, wire_style: Style.WireStyle, writer: anytype) @TypeOf(writer).Error!void {
+    var tangent_x: f64 = if (dx > 0) 1 else if (dx < 0) -1 else 0;
+    var tangent_y: f64 = if (dy > 0) 1 else if (dy < 0) -1 else 0;
 
-    const tangent_x = dx / length;
-    const tangent_y = dy / length;
+    var normal_x = tangent_y;
+    var normal_y = -tangent_x;
 
-    const normal_x = tangent_y;
-    const normal_y = -tangent_x;
+    tangent_x *= wire_style.arrow_length;
+    tangent_y *= wire_style.arrow_length;
+
+    normal_x *= wire_style.arrow_width;
+    normal_y *= wire_style.arrow_width;
 
     try writer.print(
-        \\<polyline points="{d},{d} {d},{d} {d},{d}" class="{s} arrow"/>
-        \\
+        \\ m {d} {d} l {d} {d} l {d} {d}
     , .{
-        x1 - tangent_x * self.style.arrow_length - normal_x * self.style.arrow_width,
-        y1 - tangent_y * self.style.arrow_length - normal_y * self.style.arrow_width,
+        -tangent_x - normal_x,
+        -tangent_y - normal_y,
 
-        x1, y1,
+        tangent_x + normal_x,
+        tangent_y + normal_y,
 
-        x1 - tangent_x * self.style.arrow_length + normal_x * self.style.arrow_width,
-        y1 - tangent_y * self.style.arrow_length + normal_y * self.style.arrow_width,
-
-        class,
+        -tangent_x + normal_x,
+        -tangent_y + normal_y,
     });
+}
+
+fn computeViewport(self: *Drawing) Viewport {
+    var view: Viewport = .{};
+
+    for (self.state.wires_h.items) |h_wire| {
+        var maybe_wire: ?*WireH = h_wire;
+        while (maybe_wire) |w| {
+            view.includePoint(w._x.begin, w._y);
+            view.includePoint(w._x.end, w._y);
+
+            if (w.next) |vw| {
+                view.includePoint(vw._x, vw._y.begin);
+                view.includePoint(vw._x, vw._y.end);
+
+                maybe_wire = vw.next;
+            } else {
+                maybe_wire = null;
+            }
+        }
+    }
+    for (self.state.wires_v.items) |v_wire| {
+        var maybe_wire: ?*WireV = v_wire;
+        while (maybe_wire) |w| {
+            view.includePoint(w._x, w._y.begin);
+            view.includePoint(w._x, w._y.end);
+
+            if (w.next) |hw| {
+                view.includePoint(hw._x.begin, hw._y);
+                view.includePoint(hw._x.end, hw._y);
+
+                maybe_wire = hw.next;
+            } else {
+                maybe_wire = null;
+            }
+        }
+    }
+
+    for (self.state.boxes.items) |b| {
+        view.includePoint(b._x.begin, b._y.begin);
+        view.includePoint(b._x.end, b._y.end);
+    }
+
+    for (self.state.labels.items) |l| {
+        view.includePoint(l._x, l._y);
+    }
+
+    view.left = (view.left orelse 0) - self.style.drawing_padding_x;
+    view.right = (view.right orelse 0) + self.style.drawing_padding_x;
+
+    view.top = (view.top orelse 0) - self.style.drawing_padding_y;
+    view.bottom = (view.bottom orelse 0) + self.style.drawing_padding_y;
+
+    return view;
 }
 
 const Drawing = @This();
@@ -258,5 +399,6 @@ const Interface = @import("Interface.zig");
 const Label = @import("Label.zig");
 const Constraint = @import("Constraint.zig");
 const Style = @import("Style.zig");
+const Viewport = @import("Viewport.zig");
 const values = @import("values.zig");
 const std = @import("std");

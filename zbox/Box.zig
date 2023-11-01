@@ -124,7 +124,7 @@ pub fn width(self: *Box, w: f64) *Box {
     return self;
 }
 pub fn matchWidthOf(self: *Box, other: *const Box) *Box {
-    self.state.constrain(&self._x.delta, .{ .copy = &other._x.delta });
+    self.state.constrainEql(&self._x.delta, &other._x.delta, "box width");
     return self;
 }
 
@@ -134,7 +134,7 @@ pub fn height(self: *Box, h: f64) *Box {
     return self;
 }
 pub fn matchHeightOf(self: *Box, other: *const Box) *Box {
-    self.state.constrain(&self._y.delta, .{ .copy = &other._y.delta });
+    self.state.constrainEql(&self._y.delta, &other._y.delta, "box height");
     return self;
 }
 
@@ -146,8 +146,8 @@ pub fn size(self: *Box, w: f64, h: f64) *Box {
     return self;
 }
 pub fn matchSizeOf(self: *Box, other: *const Box) *Box {
-    self.state.constrain(&self._x.delta, .{ .copy = &other._x.delta });
-    self.state.constrain(&self._y.delta, .{ .copy = &other._y.delta });
+    self.state.constrainEql(&self._x.delta, &other._x.delta, "box width");
+    self.state.constrainEql(&self._y.delta, &other._y.delta, "box height");
     return self;
 }
 
@@ -157,7 +157,7 @@ pub fn label(self: *Box, text: []const u8) *Box {
 pub fn labelWithClass(self: *Box, class: []const u8, text: []const u8) *Box {
     const item = self.state.createLabel(text, class, .center, .middle, 0);
     self.constrainLabelX(.center, &item._x);
-    self.state.constrain(&item._y, .{ .copy = &self._y.mid }, "box label y from span mid");
+    self.state.constrainEql(&item._y, &self._y.mid, "box label y from span mid");
     return self;
 }
 
@@ -167,11 +167,7 @@ pub fn topLabel(self: *Box, alignment: Label.Alignment, text: []const u8) *Box {
 pub fn topLabelWithClass(self: *Box, class: []const u8, alignment: Label.Alignment, text: []const u8) *Box {
     const item = self.state.createLabel(text, class, alignment, .hanging, 0);
     self.constrainLabelX(alignment, &item._x);
-    self.state.constrain(&item._y, .{ .offset_and_scale = .{
-        .src = &self._y.begin,
-        .offset = self.state.drawing.style.box_padding_y,
-        .scale = 1,
-    }}, "box label y from span begin");
+    self.state.constrainOffset(&item._y, &self._y.begin, self.state.drawing.style.box_padding_y, "box label y from span begin");
     return self;
 }
 
@@ -181,26 +177,14 @@ pub fn bottomLabel(self: *Box, alignment: Label.Alignment, text: []const u8) *Bo
 pub fn bottomLabelWithClass(self: *Box, class: []const u8, alignment: Label.Alignment, text: []const u8) *Box {
     const item = self.state.createLabel(text, class, alignment, .normal, 0);
     self.constrainLabelX(alignment, &item._x);
-    self.state.constrain(&item._y, .{ .offset_and_scale = .{
-        .src = &self._y.end,
-        .offset = -self.state.drawing.style.box_padding_y,
-        .scale = 1,
-    }}, "box label y from span end");
+    self.state.constrainOffset(&item._y, &self._y.end, -self.state.drawing.style.box_padding_y, "box label y from span end");
     return self;
 }
 fn constrainLabelX(self: *Box, alignment: Label.Alignment, label_x: *f64) void {
     switch (alignment) {
-        .left => self.state.constrain(label_x, .{ .offset_and_scale = .{
-            .src = &self._x.begin,
-            .offset = self.state.drawing.style.box_padding_x,
-            .scale = 1,
-        }}, "box label x from span begin"),
-        .center => self.state.constrain(label_x, .{ .copy = &self._x.mid }, "box label x from span mid"),
-        .right => self.state.constrain(label_x, .{ .offset_and_scale = .{
-            .src = &self._x.end,
-            .offset = -self.state.drawing.style.box_padding_x,
-            .scale = 1,
-        }}, "box label x from span end"),
+        .left => self.state.constrainOffset(label_x, &self._x.begin, self.state.drawing.style.box_padding_x, "box label x from span begin"),
+        .center => self.state.constrainEql(label_x, &self._x.mid, "box label x from span mid"),
+        .right => self.state.constrainOffset(label_x, &self._x.end, -self.state.drawing.style.box_padding_x, "box label x from span end"),
     }
 }
 
@@ -212,7 +196,7 @@ pub fn leftSideWithClass(self: *Box, class: []const u8, text: []const u8) PointR
     if (text.len > 0) {
         const item = self.state.createLabel(text, class, .left, .middle, 0);
         self.constrainLabelX(.left, &item._x);
-        self.state.constrain(&item._y, .{ .copy = y }, "interface label y from interface y");
+        self.state.constrainEql(&item._y, y, "interface label y from interface y");
     }
     return .{
         .state = self.state,
@@ -231,7 +215,7 @@ pub fn rightSideWithClass(self: *Box, class: []const u8, text: []const u8) Point
     if (text.len > 0) {
         const item = self.state.createLabel(text, class, .right, .middle, 0);
         self.constrainLabelX(.right, &item._x);
-        self.state.constrain(&item._y, .{ .copy = y }, "interface label y from interface y");
+        self.state.constrainEql(&item._y, y, "interface label y from interface y");
     }
     return .{
         .state = self.state,
@@ -249,12 +233,9 @@ pub fn topSideWithClass(self: *Box, class: []const u8, text: []const u8) PointRe
     const x = self.getTopInterface().push();
     if (text.len > 0) {
         const item = self.state.createLabel(text, class, .right, .middle, -90);
-        self.state.constrain(&item._x, .{ .copy = x }, "interface label x from interface x");
-        self.state.constrain(&item._y, .{ .offset_and_scale = .{
-            .src = &self._y.begin,
-            .offset = self.state.drawing.style.box_padding_x, // since we're rotated we use the x padding in the y direction
-            .scale = 1,
-        }}, "interface label y from box y span begin");
+        self.state.constrainEql(&item._x, x, "interface label x from interface x");
+        // since we're rotated we use the x padding in the y direction:
+        self.state.constrainOffset(&item._y, &self._y.begin, self.state.drawing.style.box_padding_x, "interface label y from box y span begin");
     }
     return .{
         .state = self.state,
@@ -272,12 +253,9 @@ pub fn bottomSideWithClass(self: *Box, class: []const u8, text: []const u8) Poin
     const x = self.getBottomInterface().push();
     if (text.len > 0) {
         const item = self.state.createLabel(text, class, .left, .middle, -90);
-        self.state.constrain(&item._x, .{ .copy = x }, "interface label x from interface x");
-        self.state.constrain(&item._y, .{ .offset_and_scale = .{
-            .src = &self._y.end,
-            .offset = -self.state.drawing.style.box_padding_x, // since we're rotated we use the x padding in the y direction
-            .scale = 1,
-        }}, "interface label y from box y span end");
+        self.state.constrainEql(&item._x, x, "interface label x from interface x");
+        // since we're rotated we use the x padding in the y direction:
+        self.state.constrainOffset(&item._y, &self._y.end, -self.state.drawing.style.box_padding_x, "interface label y from box y span end");
     }
     return .{
         .state = self.state,
@@ -326,8 +304,8 @@ pub fn addMissingConstraints(self: *Box) void {
 }
 
 fn addMissingInterfaceConstraints(self: *Box, interface: *Interface, default_mid: *const f64) void {
-    if (values.isUninitialized(interface.span.begin) and values.isUninitialized(interface.span.mid) and values.isUninitialized(interface.span.end)) {
-        self.state.constrain(&interface.span.mid, .{ .copy = default_mid }, "interface span mid matching box mid");
+    if (!interface.span.isPositionConstrained()) {
+        self.state.constrainEql(&interface.span.mid, default_mid, "interface span mid matching box mid");
     }
     interface.addMissingConstraints();
 }

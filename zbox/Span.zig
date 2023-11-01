@@ -9,14 +9,32 @@ min: f64 = values.uninitialized,
 max: f64 = values.uninitialized,
 len: f64 = values.uninitialized,
 
-pub fn isFullyConstrained(self: Span) bool {
+fn countUninitialized(self: Span, include_delta: bool) u8 {
     const begin: u8 = @intFromBool(values.isUninitialized(self.begin));
     const end: u8 = @intFromBool(values.isUninitialized(self.end));
     const mid: u8 = @intFromBool(values.isUninitialized(self.mid));
-    const delta: u8 = @intFromBool(values.isUninitialized(self.delta));
+    const delta: u8 = @intFromBool(include_delta and values.isUninitialized(self.delta));
+    return begin + end + mid + delta;
+}
 
-    const uninitialized_count = begin + end + mid + delta;
-    return uninitialized_count <= 2;
+pub fn isPositionConstrained(self: Span) bool {
+    return self.countUninitialized(false) <= 2;
+}
+
+pub fn isFullyConstrained(self: Span) bool {
+    return self.countUninitialized(true) <= 2;
+}
+
+pub fn isBeginConstrained(self: Span) bool {
+    return !values.isUninitialized(self.begin) or self.isFullyConstrained();
+}
+
+pub fn isMidConstrained(self: Span) bool {
+    return !values.isUninitialized(self.mid) or self.isFullyConstrained();
+}
+
+pub fn isEndConstrained(self: Span) bool {
+    return !values.isUninitialized(self.end) or self.isFullyConstrained();
 }
 
 pub fn addMissingConstraints(self: *Span, state: *DrawingState, default_mid: f64, default_delta: f64) void {
@@ -25,7 +43,7 @@ pub fn addMissingConstraints(self: *Span, state: *DrawingState, default_mid: f64
             self.defaultMid(state);
             self.defaultDelta(state);
         } else if (!values.isUninitialized(self.mid)) {
-            state.constrain(&self.end, .{ .lerp = .{ .operands = .{ &self.begin, &self.mid }, .k = 2 }}, "span end from begin/mid");
+            state.constrainLerp(&self.end, &self.begin, &self.mid, 2, "span end from begin/mid");
             self.defaultDelta(state);
         } else {
             if (values.isUninitialized(self.delta)) self.delta = default_delta;
@@ -34,7 +52,7 @@ pub fn addMissingConstraints(self: *Span, state: *DrawingState, default_mid: f64
         }
     } else if (!values.isUninitialized(self.end)) {
         if (!values.isUninitialized(self.mid)) {
-            state.constrain(&self.begin, .{ .lerp = .{ .operands = .{ &self.end, &self.mid }, .k = 2 }}, "span begin from end/mid");
+            state.constrainLerp(&self.begin, &self.end, &self.mid, 2, "span begin from end/mid");
             self.defaultDelta(state);
         } else {
             if (values.isUninitialized(self.delta)) self.delta = default_delta;
@@ -44,8 +62,8 @@ pub fn addMissingConstraints(self: *Span, state: *DrawingState, default_mid: f64
     } else {
         if (values.isUninitialized(self.mid)) self.mid = default_mid;
         if (values.isUninitialized(self.delta)) self.delta = default_delta;
-        state.constrain(&self.begin, .{ .scaled_offset = .{ .operands = .{ &self.mid, &self.delta }, .k = -0.5 }}, "span begin from mid/delta");
-        state.constrain(&self.end, .{ .scaled_offset = .{ .operands = .{ &self.mid, &self.delta }, .k = 0.5 }}, "span end from mid/delta");
+        state.constrainScaledOffset(&self.begin, &self.mid, &self.delta, -0.5, "span begin from mid/delta");
+        state.constrainScaledOffset(&self.end, &self.mid, &self.delta, 0.5, "span end from mid/delta");
     }
 
     state.constrain(&self.min, .{ .min2 = .{ &self.begin, &self.end }}, "span min from begin/end");
@@ -54,15 +72,11 @@ pub fn addMissingConstraints(self: *Span, state: *DrawingState, default_mid: f64
 }
 
 fn defaultDelta(self: *Span, state: *DrawingState) void {
-    state.constrain(&self.delta, .{
-        .difference = .{ &self.end, &self.begin },
-    }, "default span delta");
+    state.constrain(&self.delta, .{ .difference = .{ &self.end, &self.begin }}, "default span delta");
 }
 
 fn defaultMid(self: *Span, state: *DrawingState) void {
-    state.constrain(&self.mid, .{
-        .midpoint = .{ &self.begin, &self.end },
-    }, "default span mid");
+    state.constrainMidpoint(&self.mid, &self.begin, &self.end, "default span mid");
 }
 
 pub fn debug(self: *Span, writer: anytype) !void {
