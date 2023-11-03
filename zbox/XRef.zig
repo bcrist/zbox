@@ -12,7 +12,7 @@ pub fn anchorAt(self: XRef, abs_x: f64) XRef {
 }
 
 pub fn attach(self: XRef, other: XRef) XRef {
-    other.attachTo(self);
+    _ = other.attachTo(self);
     return self;
 }
 pub fn attachTo(self: XRef, target: XRef) XRef {

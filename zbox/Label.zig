@@ -1,3 +1,4 @@
+state: *DrawingState,
 text: []const u8,
 class: []const u8,
 alignment: Alignment,
@@ -17,6 +18,14 @@ pub const Baseline = enum {
     middle,
     hanging,
 };
+
+pub fn anchorPoint(self: *Label) PointRef {
+    return .{
+        .state = self.state,
+        ._x = &self._x,
+        ._y = &self._y,
+    };
+}
 
 pub fn addMissingConstraints(self: *Label) void {
     if (values.isUninitialized(self._x)) {
@@ -39,5 +48,7 @@ pub fn debug(self: *Label, writer: anytype) !void {
 }
 
 const Label = @This();
+const PointRef = @import("PointRef.zig");
+const DrawingState = @import("DrawingState.zig");
 const values = @import("values.zig");
 const std = @import("std");

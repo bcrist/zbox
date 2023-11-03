@@ -46,7 +46,13 @@ test "example" {
     _ = b2.bottom().attachTo(b.bottom());
 
 
-    //const halfway = d.someX().attachBetween(b.right(), b2.left(), 0.5);
+    const halfway = d.someX().attachBetween(b.right(), b2.left(), 0.5);
+
+    const sep = d.separatorV();
+    _ = sep.x().attachTo(halfway);
+
+    _ = sep.label(d.y(0), .left, .normal, "asdf1");
+    _ = sep.label(d.y(0), .left, .hanging, "asdf2");
 
     const cols = d.columns();
     _ = cols.center().attachBetween(b.right(), b2.left(), 0.5);

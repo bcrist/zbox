@@ -16,6 +16,9 @@ wires_v: std.ArrayListUnmanaged(*WireV) = .{},
 x_ref_clusters: std.ArrayListUnmanaged(*XRefCluster) = .{},
 y_ref_clusters: std.ArrayListUnmanaged(*YRefCluster) = .{},
 
+separators_h: std.ArrayListUnmanaged(*SeparatorH) = .{},
+separators_v: std.ArrayListUnmanaged(*SeparatorV) = .{},
+
 loose_values: std.ArrayListUnmanaged(*f64) = .{},
 
 // note this includes the interfaces inside X/YRefClusters as well
@@ -29,6 +32,8 @@ pub fn deinit(self: *DrawingState) void {
 
     self.interfaces.deinit(self.gpa);
     self.loose_values.deinit(self.gpa);
+    self.separators_h.deinit(self.gpa);
+    self.separators_v.deinit(self.gpa);
     self.y_ref_clusters.deinit(self.gpa);
     self.x_ref_clusters.deinit(self.gpa);
     self.wires_v.deinit(self.gpa);
@@ -52,6 +57,7 @@ pub fn createLabel(self: *DrawingState, text: []const u8, class: []const u8, ali
     const arena = self.arena.allocator();
     const item = arena.create(Label) catch @panic("OOM");
     item.* = .{
+        .state = self,
         .text = text,
         .class = class,
         .alignment = alignment,
@@ -89,6 +95,28 @@ pub fn createWireV(self: *DrawingState, options: wires.Options, previous: ?*Wire
     } else {
         self.wires_v.append(self.gpa, item) catch @panic("OOM");
     }
+    return item;
+}
+
+pub fn createSeparatorH(self: *DrawingState, class: []const u8) *SeparatorH {
+    const arena = self.arena.allocator();
+    const item = arena.create(SeparatorH) catch @panic("OOM");
+    item.* = .{
+        .state = self,
+        .class = class,
+    };
+    self.separators_h.append(self.gpa, item) catch @panic("OOM");
+    return item;
+}
+
+pub fn createSeparatorV(self: *DrawingState, class: []const u8) *SeparatorV {
+    const arena = self.arena.allocator();
+    const item = arena.create(SeparatorV) catch @panic("OOM");
+    item.* = .{
+        .state = self,
+        .class = class,
+    };
+    self.separators_v.append(self.gpa, item) catch @panic("OOM");
     return item;
 }
 
@@ -156,6 +184,17 @@ pub fn addMissingConstraints(self: *DrawingState) void {
     }
     for (self.y_ref_clusters.items) |c| {
         c.interface.addMissingConstraints();
+    }
+
+    for (self.separators_h.items) |sep| {
+        if (values.isUninitialized(sep._y)) {
+            sep._y = 0;
+        }
+    }
+    for (self.separators_v.items) |sep| {
+        if (values.isUninitialized(sep._x)) {
+            sep._x = 0;
+        }
     }
 
     for (self.loose_values.items) |v| {
@@ -272,6 +311,8 @@ const YRef = @import("YRef.zig");
 const XRefCluster = @import("XRefCluster.zig");
 const YRefCluster = @import("YRefCluster.zig");
 const Box = @import("Box.zig");
+const SeparatorH = @import("SeparatorH.zig");
+const SeparatorV = @import("SeparatorV.zig");
 const wires = @import("wires.zig");
 const WireH = @import("WireH.zig");
 const WireV = @import("WireV.zig");

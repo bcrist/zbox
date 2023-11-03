@@ -71,6 +71,19 @@ pub fn offset(self: PointRef, x_offset: f64, y_offset: f64) PointRef {
     };
 }
 
+pub fn label(self: PointRef, class: []const u8, alignment: Label.Alignment, baseline: Label.Baseline, text: []const u8) *Label {
+    const item = self.state.createLabel(text, class, alignment, baseline, 0);
+    self.state.constrainEql(&item._x, self._x, "label x");
+    self.state.constrainEql(&item._y, self._y, "label y");
+    return item;
+}
+pub fn labelV(self: PointRef, class: []const u8, alignment: Label.Alignment, baseline: Label.Baseline, text: []const u8) *Label {
+    const item = self.state.createLabel(text, class, alignment, baseline, -90);
+    self.state.constrainEql(&item._x, self._x, "label x");
+    self.state.constrainEql(&item._y, self._y, "label y");
+    return item;
+}
+
 pub fn wireH(self: PointRef, options: wires.Options) *WireH {
     const item = self.state.createWireH(options, null);
     self.state.constrainEql(&item._x.begin, self._x, "wire begin x");
@@ -88,6 +101,7 @@ pub fn wireV(self: PointRef, options: wires.Options) *WireV {
 const PointRef = @This();
 const XRef = @import("XRef.zig");
 const YRef = @import("YRef.zig");
+const Label = @import("Label.zig");
 const WireH = @import("WireH.zig");
 const WireV = @import("WireV.zig");
 const wires = @import("wires.zig");

@@ -18,6 +18,13 @@ pub fn deinit(self: *Drawing) void {
     gpa.destroy(self);
 }
 
+pub fn label(self: *Drawing, class: []const u8, alignment: Label.Alignment, baseline: Label.Baseline, text: []const u8) *Label {
+    return self.state.createLabel(text, class, alignment, baseline, 0);
+}
+pub fn labelV(self: *Drawing, class: []const u8, alignment: Label.Alignment, baseline: Label.Baseline, text: []const u8) *Label {
+    return self.state.createLabel(text, class, alignment, baseline, -90);
+}
+
 pub fn box(self: *Drawing) *Box {
     return self.state.createBox(self.style.default_box_class);
 }
@@ -34,18 +41,34 @@ pub fn box(self: *Drawing) *Box {
 // TODO transmission gates
 // TODO muxes & demuxes
 // TODO ALU blocks
-// TODO bus interface blocks
+// TODO bus line driver blocks
 // TODO bus/wire swap block
 // TODO flowchart shapes
 // TODO memory layout/protocol diagrams
 // TODO simple tables
 // TODO railroad diagrams?
 
+pub fn separatorH(self: *Drawing) *SeparatorH {
+    return self.state.createSeparatorH(self.style.default_separator_class);
+}
+
+pub fn separatorV(self: *Drawing) *SeparatorV {
+    return self.state.createSeparatorV(self.style.default_separator_class);
+}
+
 pub fn columns(self: *Drawing) *XRefCluster {
     return self.state.createXRefCluster();
 }
 pub fn rows(self: *Drawing) *YRefCluster {
     return self.state.createYRefCluster();
+}
+
+pub fn wireH(self: *Drawing, options: wires.Options) *WireH {
+    return self.state.createWireH(options, null);
+}
+
+pub fn wireV(self: *Drawing, options: wires.Options) *WireV {
+    return self.state.createWireV(options, null);
 }
 
 pub fn at(self: *Drawing, abs_x: f64, abs_y: f64) PointRef {
@@ -137,6 +160,27 @@ pub fn renderSvg(self: *Drawing, writer: anytype) !void {
             \\</style>
             \\
         , .{ self.style.css });
+    }
+
+    for (self.state.separators_h.items) |s| {
+        try writer.print(
+            \\<line x1="{d}" y1="{d}" x2="{d}" y2="{d}" class="{s} sep"/>
+            \\
+        , .{
+            view.left.?, s._y,
+            view.right.?, s._y,
+            s.class,
+        });
+    }
+    for (self.state.separators_v.items) |s| {
+        try writer.print(
+            \\<line x1="{d}" y1="{d}" x2="{d}" y2="{d}" class="{s} sep"/>
+            \\
+        , .{
+            s._x, view.top.?,
+            s._x, view.bottom.?,
+            s.class,
+        });
     }
 
     for (self.state.wires_h.items) |w| {
@@ -397,6 +441,8 @@ const YRef = @import("YRef.zig");
 const XRefCluster = @import("XRefCluster.zig");
 const YRefCluster = @import("YRefCluster.zig");
 const Box = @import("Box.zig");
+const SeparatorH = @import("SeparatorH.zig");
+const SeparatorV = @import("SeparatorV.zig");
 const wires = @import("wires.zig");
 const WireH = @import("WireH.zig");
 const WireV = @import("WireV.zig");

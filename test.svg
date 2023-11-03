@@ -23,6 +23,15 @@ text.box_label {
     font-size: 25px;
 }
 
+.separator {
+    stroke-width: 3;
+    stroke: #262c38;
+}
+.separator_label {
+    fill: #12161d;
+    font-size: 18px;
+}
+
 .box {
     stroke-width: 2;
     stroke: #ECEFF4;
@@ -58,6 +67,7 @@ line.bitmark {
     stroke-width: 1;
 }
 </style>
+<line x1="225" y1="-275" x2="225" y2="425" class="separator sep"/>
 <path d="M -150 0 H -200 V -250 H 200 V 20 H 150" class="wire"/>
 <path d="M 150 40 H 235 V 120 H 300 M 150 40 m 12 -8 l -12 8 l 12 8" class="bus"/>
 <line x1="187.5" y1="45" x2="197.5" y2="35" class="bus bitmark"/>
@@ -100,6 +110,8 @@ line.bitmark {
 <text x="30" y="-192" text-anchor="end" dominant-baseline="middle" transform-origin="30 -192" transform="rotate(-90)" class="interface_label">asd3</text>
 <text x="-10" y="192" text-anchor="start" dominant-baseline="middle" transform-origin="-10 192" transform="rotate(-90)" class="interface_label">Hello World!</text>
 <text x="10" y="192" text-anchor="start" dominant-baseline="middle" transform-origin="10 192" transform="rotate(-90)" class="interface_label">Hellorld!</text>
+<text x="221" y="8" text-anchor="start" dominant-baseline="auto" transform-origin="221 8" transform="rotate(-90)" class="separator_label">asdf1</text>
+<text x="229" y="8" text-anchor="start" dominant-baseline="hanging" transform-origin="229 8" transform="rotate(-90)" class="separator_label">asdf2</text>
 <text x="142" y="40" text-anchor="end" dominant-baseline="middle" class="interface_label">D4</text>
 <text x="239" y="48" text-anchor="end" dominant-baseline="hanging" transform-origin="239 48" transform="rotate(-90)" class="bus_label">D4</text>
 <text x="308" y="120" text-anchor="start" dominant-baseline="middle" class="interface_label">IN</text>

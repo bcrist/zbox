@@ -15,6 +15,11 @@ default_label_class: []const u8 = "label",
 default_interface_label_class: []const u8 = "interface_label",
 default_interface_spacing: f64 = 20,
 
+default_separator_class: []const u8 = "separator",
+default_separator_label_class: []const u8 = "separator_label",
+separator_label_padding_x: f64 = 8,
+separator_label_padding_y: f64 = 4,
+
 wire_style: WireStyle = .{
     .default_class = "wire",
     .default_label_class = "wire_label",

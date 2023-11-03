@@ -19,6 +19,15 @@ text.box_label {
     font-size: 25px;
 }
 
+.separator {
+    stroke-width: 3;
+    stroke: #262c38;
+}
+.separator_label {
+    fill: #12161d;
+    font-size: 18px;
+}
+
 .box {
     stroke-width: 2;
     stroke: #ECEFF4;
