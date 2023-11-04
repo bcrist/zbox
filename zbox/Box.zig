@@ -32,6 +32,19 @@ pub fn bottom(self: *Box) YRef {
     };
 }
 
+pub fn x(self: *Box) XRef {
+    return .{
+        .state = self.state,
+        ._x = &self._x.mid,
+    };
+}
+pub fn y(self: *Box) YRef {
+    return .{
+        .state = self.state,
+        ._y = &self._y.mid,
+    };
+}
+
 pub fn topLeft(self: *Box) PointRef {
     return .{
         .state = self.state,
