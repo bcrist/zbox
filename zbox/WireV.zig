@@ -60,6 +60,7 @@ pub fn label(self: *WireV, text: []const u8, options: Label.Options) *WireV {
     const style = if (self.options.bits > 1) self.state.drawing.style.bus_style else self.state.drawing.style.wire_style;
     var options_mut = options;
     options_mut.angle = -90;
+    options_mut._class1 = self.options.class;
     options_mut._class2 = if (self.options.bits > 1) "wire-label bus" else "wire-label";
 
     const item = self.state.createLabel(text, options_mut);

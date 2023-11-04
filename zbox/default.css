@@ -66,6 +66,6 @@ text.bitmark-label {
     fill: #5E81AC;
     stroke: none;
 }
-.wire.wire.bitmark {
+.wire.wire.wire.bitmark {
     stroke-width: 1;
 }
