@@ -183,16 +183,16 @@ pub fn leftSide(self: *Box, text: []const u8) PointRef {
     return self.leftSideWithClass(self.state.drawing.style.default_interface_label_class, text);
 }
 pub fn leftSideWithClass(self: *Box, class: []const u8, text: []const u8) PointRef {
-    const y = self.getLeftInterface().push();
+    const iy = self.getLeftInterface().push();
     if (text.len > 0) {
         const item = self.state.createLabel(text, class, .left, .middle, 0);
         self.constrainLabelX(.left, &item._x);
-        self.state.constrainEql(&item._y, y, "interface label y from interface y");
+        self.state.constrainEql(&item._y, iy, "interface label y from interface y");
     }
     return .{
         .state = self.state,
         ._x = &self._x.begin,
-        ._y = y,
+        ._y = iy,
     };
 }
 
@@ -200,16 +200,16 @@ pub fn rightSide(self: *Box, text: []const u8) PointRef {
     return self.rightSideWithClass(self.state.drawing.style.default_interface_label_class, text);
 }
 pub fn rightSideWithClass(self: *Box, class: []const u8, text: []const u8) PointRef {
-    const y = self.getRightInterface().push();
+    const iy = self.getRightInterface().push();
     if (text.len > 0) {
         const item = self.state.createLabel(text, class, .right, .middle, 0);
         self.constrainLabelX(.right, &item._x);
-        self.state.constrainEql(&item._y, y, "interface label y from interface y");
+        self.state.constrainEql(&item._y, iy, "interface label y from interface y");
     }
     return .{
         .state = self.state,
         ._x = &self._x.end,
-        ._y = y,
+        ._y = iy,
     };
 }
 
@@ -217,16 +217,16 @@ pub fn topSide(self: *Box, text: []const u8) PointRef {
     return self.topSideWithClass(self.state.drawing.style.default_interface_label_class, text);
 }
 pub fn topSideWithClass(self: *Box, class: []const u8, text: []const u8) PointRef {
-    const x = self.getTopInterface().push();
+    const ix = self.getTopInterface().push();
     if (text.len > 0) {
         const item = self.state.createLabel(text, class, .right, .middle, -90);
-        self.state.constrainEql(&item._x, x, "interface label x from interface x");
+        self.state.constrainEql(&item._x, ix, "interface label x from interface x");
         // since we're rotated we use the x padding in the y direction:
         self.state.constrainOffset(&item._y, &self._y.begin, self.state.drawing.style.box_padding_x, "interface label y from box y span begin");
     }
     return .{
         .state = self.state,
-        ._x = x,
+        ._x = ix,
         ._y = &self._y.begin,
     };
 }
@@ -235,16 +235,16 @@ pub fn bottomSide(self: *Box, text: []const u8) PointRef {
     return self.bottomSideWithClass(self.state.drawing.style.default_interface_label_class, text);
 }
 pub fn bottomSideWithClass(self: *Box, class: []const u8, text: []const u8) PointRef {
-    const x = self.getBottomInterface().push();
+    const ix = self.getBottomInterface().push();
     if (text.len > 0) {
         const item = self.state.createLabel(text, class, .left, .middle, -90);
-        self.state.constrainEql(&item._x, x, "interface label x from interface x");
+        self.state.constrainEql(&item._x, ix, "interface label x from interface x");
         // since we're rotated we use the x padding in the y direction:
         self.state.constrainOffset(&item._y, &self._y.end, -self.state.drawing.style.box_padding_x, "interface label y from box y span end");
     }
     return .{
         .state = self.state,
-        ._x = x,
+        ._x = ix,
         ._y = &self._y.end,
     };
 }
