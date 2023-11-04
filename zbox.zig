@@ -1,4 +1,22 @@
+pub const wires = @import("zbox/wires.zig");
+pub const values = @import("zbox/values.zig");
+
 pub const Drawing = @import("zbox/Drawing.zig");
+
+pub const XRef = @import("zbox/XRef.zig");
+pub const YRef = @import("zbox/YRef.zig");
+pub const PointRef = @import("zbox/PointRef.zig");
+pub const XRefCluster = @import("zbox/XRefCluster.zig");
+pub const YRefCluster = @import("zbox/YRefCluster.zig");
+
+pub const Box = @import("zbox/Box.zig");
+pub const Label = @import("zbox/Label.zig");
+
+pub const WireH = @import("zbox/WireH.zig");
+pub const WireV = @import("zbox/WireV.zig");
+
+pub const SeparatorH = @import("zbox/SeparatorH.zig");
+pub const SeparatorV = @import("zbox/SeparatorV.zig");
 
 test "example" {
     var d = Drawing.init(std.testing.allocator);
