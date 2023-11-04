@@ -333,11 +333,11 @@ pub fn addMissingConstraints(self: *Box) void {
 
     self._x.addMissingConstraints(self.state, 0, switch (self.options.shape) {
         .block, .mux, .demux => 240,
-        .small => 30,
+        .small => 25,
     });
     self._y.addMissingConstraints(self.state, 0, switch (self.options.shape) {
         .block, .mux, .demux => 120,
-        .small => 30,
+        .small => 25,
     });
 }
 
