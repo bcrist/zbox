@@ -25,8 +25,8 @@ pub fn labelV(self: *Drawing, class: []const u8, alignment: Label.Alignment, bas
     return self.state.createLabel(text, class, alignment, baseline, -90);
 }
 
-pub fn box(self: *Drawing) *Box {
-    return self.state.createBox(self.style.default_box_class);
+pub fn box(self: *Drawing, options: Box.Options) *Box {
+    return self.state.createBox(options);
 }
 
 // TODO cubic beziers - "swoopWest/East/North/South"
@@ -49,11 +49,11 @@ pub fn box(self: *Drawing) *Box {
 // TODO railroad diagrams?
 
 pub fn separatorH(self: *Drawing) *SeparatorH {
-    return self.state.createSeparatorH(self.style.default_separator_class);
+    return self.state.createSeparatorH();
 }
 
 pub fn separatorV(self: *Drawing) *SeparatorV {
-    return self.state.createSeparatorV(self.style.default_separator_class);
+    return self.state.createSeparatorV();
 }
 
 pub fn columns(self: *Drawing) *XRefCluster {
@@ -153,14 +153,13 @@ pub fn renderSvg(self: *Drawing, writer: anytype) !void {
         , .{ self.desc });
     }
 
-    if (self.style.css.len > 0) {
-        try writer.print(
-            \\<style>
-            \\{s}
-            \\</style>
-            \\
-        , .{ self.style.css });
-    }
+    try writer.print(
+        \\<style>
+        \\{s}
+        \\{s}
+        \\</style>
+        \\
+    , .{ self.style.base_css, self.style.extra_css });
 
     for (self.state.separators_h.items) |s| {
         try writer.print(
@@ -191,54 +190,109 @@ pub fn renderSvg(self: *Drawing, writer: anytype) !void {
     }
 
     for (self.state.boxes.items) |b| {
-        try writer.print(
-            \\<rect x="{d}" y="{d}" width="{d}" height="{d}" class="{s}"/>
-            \\
-        , .{
-            b._x.min, b._y.min,
-            b._x.len, b._y.len,
-            b.class,
-        });
+        try self.renderSvgBox(b, writer);
     }
 
     for (self.state.labels.items) |l| {
-        try renderSvgLabel(l._x, l._y, l.alignment, l.baseline, l.angle, l.class, "", l.text, writer);
+        try renderSvgLabel(l._x, l._y, l.text, l.options, writer);
     }
 
     try writer.writeAll("</svg>");
 }
 
-fn renderSvgLabel(lx: f64, ly: f64, alignment: Label.Alignment, baseline: Label.Baseline, angle: f64, class: []const u8, class2: []const u8, text: []const u8, writer: anytype) @TypeOf(writer).Error!void {
+fn renderSvgBox(self: *Drawing, b: *Box, writer: anytype) @TypeOf(writer).Error!void {
+    switch (b.options.shape) {
+        .mux => {
+            const dy = b._x.len / 4;
+            try writer.print(
+                \\<path d="M {d} {d} V {d} L {d} {d} V {d} Z" class="box {s} {s}"/>
+                \\
+            , .{
+                b._x.begin,      // top left x
+                b._y.begin - dy, // top left y
+                b._y.end + dy,   // bottom left y
+                b._x.end,        // bottom right x
+                b._y.end - dy,   // bottom right y
+                b._y.begin + dy, // top right y
+                @tagName(b.options.shape),
+                b.options.class,
+            });
+        },
+        .demux => {
+            const dy = b._x.len / 4;
+            try writer.print(
+                \\<path d="M {d} {d} V {d} L {d} {d} V {d} Z" class="box {s} {s}"/>
+                \\
+            , .{
+                b._x.begin,      // top left x
+                b._y.begin + dy, // top left y
+                b._y.end - dy,   // bottom left y
+                b._x.end,        // bottom right x
+                b._y.end + dy,   // bottom right y
+                b._y.begin - dy, // top right y
+                @tagName(b.options.shape),
+                b.options.class,
+            });
+        },
+        .block, .small => {
+            try writer.print(
+                \\<rect x="{d}" y="{d}" width="{d}" height="{d}" class="box {s} {s}"/>
+                \\
+            , .{
+                b._x.min, b._y.min,
+                b._x.len, b._y.len,
+                @tagName(b.options.shape),
+                b.options.class,
+            });
+        },
+    }
+
+    if (b.options.label.len > 0) {
+        const n: f64 = @floatFromInt(std.mem.count(u8, b.options.label, "\n"));
+        const tx = b._x.mid;
+        var ty = b._y.mid - n * self.style.box_label_line_height / 2;
+
+        var iter = std.mem.splitScalar(u8, b.options.label, '\n');
+        while (iter.next()) |line| {
+            try renderSvgLabel(tx, ty, line, .{
+                .class = b.options.label_class,
+                ._class1 = @tagName(b.options.shape),
+                ._class2 = "box-label main",
+                .alignment = .center,
+                .baseline = .middle,
+            }, writer);
+            ty += self.style.box_label_line_height;
+        }
+    }
+}
+
+fn renderSvgLabel(lx: f64, ly: f64, text: []const u8, options: Label.Options, writer: anytype) @TypeOf(writer).Error!void {
     try writer.print(
-        \\<text x="{d}" y="{d}" text-anchor="{s}" dominant-baseline="{s}"
+        \\<text x="{d}" y="{d}" class="label _{s}{s}
     , .{
         lx, ly,
-        switch (alignment) {
-            .left => "start",
-            .center => "middle",
-            .right => "end",
-        },
-        switch (baseline) {
-            .normal => "auto",
-            .middle => "middle",
-            .hanging => "hanging",
-        },
+        @tagName(options.baseline)[0..1],
+        @tagName(options.alignment)[0..1],
     });
-    if (angle != 0) {
+    if (options.class.len > 0) try writer.print(" {s}", .{ options.class });
+    if (options._class1.len > 0) try writer.print(" {s}", .{ options._class1 });
+    if (options._class2.len > 0) try writer.print(" {s}", .{ options._class2 });
+
+    if (options.angle != 0) {
         try writer.print(
-            \\ transform-origin="{d} {d}" transform="rotate({d})"
+            \\" transform-origin="{d} {d}" transform="rotate({d})"
         , .{
             lx, ly,
-            angle,
+            options.angle,
         });
+    } else {
+        try writer.writeByte('"');
     }
+
     try writer.print(
-        \\ class="{s}{s}">{s}</text>
+        \\>{s}</text>
         \\
-    , .{
-        class, class2,
-        text,
-    });
+    , .{ text });
 }
 
 fn renderSvgWire(self: *Drawing, wire: wires.WireRef, writer: anytype) @TypeOf(writer).Error!void {
@@ -299,12 +353,10 @@ fn renderSvgWire(self: *Drawing, wire: wires.WireRef, writer: anytype) @TypeOf(w
         try renderSvgArrowheadPath(dx, dy, style, writer);
     }
 
-    const class = options.class orelse style.default_class;
-
-    try writer.print(
-        \\" class="{s}"/>
-        \\
-    , .{ class });
+    try writer.writeAll("\" class=\"wire");
+    if (options.bits > 1) try writer.writeAll(" bus");
+    if (options.class.len > 0) try writer.print(" {s}", .{ options.class });
+    try writer.writeAll("\"/>\n");
 
     iter = .{ .wire = wire };
     while (iter.next()) |segment| {
@@ -321,16 +373,26 @@ fn renderSvgWire(self: *Drawing, wire: wires.WireRef, writer: anytype) @TypeOf(w
             const y1 = cy - style.bit_mark_length / 2;
 
             try writer.print(
-                \\<line x1="{d}" y1="{d}" x2="{d}" y2="{d}" class="{s} bitmark"/>
-                \\
-            , .{ x0, y0, x1, y1, class });
+                \\<line x1="{d}" y1="{d}" x2="{d}" y2="{d}" class="wire bitmark
+            , .{ x0, y0, x1, y1 });
+            if (options.bits > 1) try writer.writeAll(" bus");
+            if (options.class.len > 0) try writer.print(" {s}", .{ options.class });
+            try writer.writeAll("\"/>\n");
 
             var buf: [64]u8 = undefined;
             const text = try std.fmt.bufPrint(&buf, "{}", .{ options.bits });
 
             switch (segment) {
-                .H => try renderSvgLabel(cx, cy + style.bit_mark_label_offset_y, .center, .hanging, 0, class, " bitmark", text, writer),
-                .V => try renderSvgLabel(cx + style.bit_mark_label_offset_x, cy + style.bit_mark_label_offset_xy, .left, .middle, 0, class, " bitmark", text, writer),
+                .H => try renderSvgLabel(cx, cy + style.bit_mark_label_offset_y, text, .{
+                    .alignment = .center,
+                    .baseline = .hanging,
+                    .class = "bitmark-label",
+                }, writer),
+                .V => try renderSvgLabel(cx + style.bit_mark_label_offset_x, cy + style.bit_mark_label_offset_xy, text, .{
+                    .alignment = .left,
+                    .baseline = .middle,
+                    .class = "bitmark-label",
+                }, writer),
             }
         }
     }
@@ -338,17 +400,22 @@ fn renderSvgWire(self: *Drawing, wire: wires.WireRef, writer: anytype) @TypeOf(w
     if (draw_start_junction) {
         const begin = wire.begin();
         try writer.print(
-            \\<circle cx="{d}" cy="{d}" r="{d}" class="{s} junction"/>
-            \\
-        , .{ begin._x.*, begin._y.*, style.junction_radius, class });
+            \\<circle cx="{d}" cy="{d}" r="{d}" class="wire junction
+        , .{ begin._x.*, begin._y.*, style.junction_radius });
+        if (options.bits > 1) try writer.writeAll(" bus");
+        if (options.class.len > 0) try writer.print(" {s}", .{ options.class });
+        try writer.writeAll("\"/>\n");
     }
+    
 
     if (draw_end_junction) {
         const end = final_segment.end();
         try writer.print(
-            \\<circle cx="{d}" cy="{d}" r="{d}" class="{s} junction"/>
-            \\
-        , .{ end._x.*, end._y.*, style.junction_radius, class });
+            \\<circle cx="{d}" cy="{d}" r="{d}" class="wire junction
+        , .{ end._x.*, end._y.*, style.junction_radius });
+        if (options.bits > 1) try writer.writeAll(" bus");
+        if (options.class.len > 0) try writer.print(" {s}", .{ options.class });
+        try writer.writeAll("\"/>\n");
     }
 }
 

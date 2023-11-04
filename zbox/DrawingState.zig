@@ -45,6 +45,10 @@ pub fn deinit(self: *DrawingState) void {
     self.arena.deinit();
 }
 
+pub fn print(self: *DrawingState, comptime fmt: []const u8, args: anytype) []const u8 {
+    return std.fmt.allocPrint(self.arena.allocator(), fmt, args) catch @panic("OOM");
+}
+
 pub fn createValue(self: *DrawingState, initial_value: f64) *f64 {
     const arena = self.arena.allocator();
     var item = arena.create(f64) catch @panic("OOM");
@@ -53,16 +57,13 @@ pub fn createValue(self: *DrawingState, initial_value: f64) *f64 {
     return item;
 }
 
-pub fn createLabel(self: *DrawingState, text: []const u8, class: []const u8, alignment: Label.Alignment, baseline: Label.Baseline, angle: f64) *Label {
+pub fn createLabel(self: *DrawingState, text: []const u8, options: Label.Options) *Label {
     const arena = self.arena.allocator();
     const item = arena.create(Label) catch @panic("OOM");
     item.* = .{
         .state = self,
         .text = text,
-        .class = class,
-        .alignment = alignment,
-        .baseline = baseline,
-        .angle = angle,
+        .options = options,
     };
     self.labels.append(self.gpa, item) catch @panic("OOM");
     return item;
@@ -98,34 +99,32 @@ pub fn createWireV(self: *DrawingState, options: wires.Options, previous: ?*Wire
     return item;
 }
 
-pub fn createSeparatorH(self: *DrawingState, class: []const u8) *SeparatorH {
+pub fn createSeparatorH(self: *DrawingState) *SeparatorH {
     const arena = self.arena.allocator();
     const item = arena.create(SeparatorH) catch @panic("OOM");
     item.* = .{
         .state = self,
-        .class = class,
     };
     self.separators_h.append(self.gpa, item) catch @panic("OOM");
     return item;
 }
 
-pub fn createSeparatorV(self: *DrawingState, class: []const u8) *SeparatorV {
+pub fn createSeparatorV(self: *DrawingState) *SeparatorV {
     const arena = self.arena.allocator();
     const item = arena.create(SeparatorV) catch @panic("OOM");
     item.* = .{
         .state = self,
-        .class = class,
     };
     self.separators_v.append(self.gpa, item) catch @panic("OOM");
     return item;
 }
 
-pub fn createBox(self: *DrawingState, class: []const u8) *Box {
+pub fn createBox(self: *DrawingState, options: Box.Options) *Box {
     const arena = self.arena.allocator();
     const item = arena.create(Box) catch @panic("OOM");
     item.* = .{
         .state = self,
-        .class = class,
+        .options = options,
     };
     self.boxes.append(self.gpa, item) catch @panic("OOM");
     return item;

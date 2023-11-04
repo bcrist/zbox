@@ -1,11 +1,17 @@
 state: *DrawingState,
 text: []const u8,
-class: []const u8,
-alignment: Alignment,
-baseline: Baseline,
-angle: f64,
+options: Options,
 _x: f64 = values.uninitialized,
 _y: f64 = values.uninitialized,
+
+pub const Options = struct {
+    class: []const u8 = "",
+    _class1: []const u8 = "", // reserved
+    _class2: []const u8 = "", // reserved
+    alignment: Alignment = .left,
+    baseline: Baseline = .normal,
+    angle: f64 = 0,
+};
 
 pub const Alignment = enum {
     left,

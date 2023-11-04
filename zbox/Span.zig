@@ -37,6 +37,10 @@ pub fn isEndConstrained(self: Span) bool {
     return !values.isUninitialized(self.end) or self.isFullyConstrained();
 }
 
+pub fn isDeltaConstrained(self: Span) bool {
+    return !values.isUninitialized(self.delta) or self.isFullyConstrained();
+}
+
 pub fn addMissingConstraints(self: *Span, state: *DrawingState, default_mid: f64, default_delta: f64) void {
     if (!values.isUninitialized(self.begin)) {
         if (!values.isUninitialized(self.end)) {

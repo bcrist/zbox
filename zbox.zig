@@ -25,8 +25,7 @@ test "example" {
     d.title = "Test";
     d.desc = "some descriptive words";
 
-    const b = d.box()
-        .label("Hello World")
+    const b = d.box(.{ .label = "Hello\nWorld" })
         .topLabel(.left, "ASDF")
         .bottomLabel(.right, "123abc")
         ;
@@ -50,7 +49,14 @@ test "example" {
         .endAtPoint(b.topSide("asdf"))
         ;
 
-    
+    const small = d.box(.{ .shape = .small, .label = "^1" });
+    _ = small.topLeft().attachToOffset(b.topRight(), 300, 0);
+
+    const mux = d.box(.{ .shape = .mux });
+    _ = mux.topCenter().attachToOffset(small.bottomCenter(), 0, 50);
+
+    const demux = d.box(.{ .shape = .demux });
+    _ = demux.middleLeft().attachToOffset(mux.middleRight(), 50, 0);
 
     _ = b.topSide("asd");
     _ = b.topSide("asd2");
@@ -58,7 +64,7 @@ test "example" {
     _ = b.bottomSide("Hello World!");
     _ = b.bottomSide("Hellorld!");
 
-    const b2 = d.box();
+    const b2 = d.box(.{});
 
     _ = b2.left().attachToOffset(b.right(), 150);
     _ = b2.bottom().attachTo(b.bottom());
@@ -69,8 +75,8 @@ test "example" {
     const sep = d.separatorV();
     _ = sep.x().attachTo(halfway);
 
-    _ = sep.label(d.y(0), .left, .normal, "asdf1");
-    _ = sep.label(d.y(0), .left, .hanging, "asdf2");
+    _ = sep.label(d.y(0), "asdf1", .{});
+    _ = sep.label(d.y(0), "asdf2", .{ .baseline = .hanging });
 
     const cols = d.columns();
     _ = cols.center().attachBetween(b.right(), b2.left(), 0.5);
@@ -80,14 +86,14 @@ test "example" {
         .bitMark()
         .turnAt(cols.push())
         .bitMark()
-        .labelRight(.right, "D4")
+        .label("D4", .{ .baseline = .hanging, .alignment = .right })
         .turnAndEndAt(b2.leftSide("IN"));
 
     _ = b.rightSide("D5")
         .wireH(.{ .dir = .junction_both })
         .turnAt(cols.push())
         .bitMarkAt(0.2)
-        .labelLeft(.left, "D5")
+        .label("D5", .{})
         .turnAndEndAt(b2.leftSide("IN2"));
 
     _ = b2.leftSide("aaa")
@@ -97,7 +103,7 @@ test "example" {
 
     cols.interface.flip();
 
-    const b3 = d.box();
+    const b3 = d.box(.{});
     _ = b2.bottomRight().attach(b3.bottomLeft());
 
     const bus = d.point()
@@ -113,9 +119,9 @@ test "example" {
         .turn()
         .endAtPoint(bus2.endpoint().offset(0, 100));
 
-    _ = bus.labelLeft("Hellorld");
-    _ = bus2.labelAbove(.left, "Hello");
-    _ = bus2.labelRight("fasdf");
+    _ = bus.label("Hellorld", .{ .baseline = .middle, .alignment = .right });
+    _ = bus2.label("Hello", .{});
+    _ = bus2.label("fasdf", .{ .baseline = .middle, .alignment = .left });
 
     _ = bus.y().wire(.{ .dir = .forward }).endAtPoint(b2.bottomSide("ABC"));
     _ = bus.y().wire(.{ .dir = .reverse }).endAtPoint(b2.bottomSide("DEF"));

@@ -56,59 +56,32 @@ pub fn bitMarkAt(self: *WireV, f: f64) *WireV {
     return self;
 }
 
-pub fn labelLeft(self: *WireV, alignment: Label.Alignment, text: []const u8) *WireV {
+pub fn label(self: *WireV, text: []const u8, options: Label.Options) *WireV {
     const style = if (self.options.bits > 1) self.state.drawing.style.bus_style else self.state.drawing.style.wire_style;
-    return self.labelLeftWithClass(style.default_label_class, alignment, text);
-}
-pub fn labelLeftWithClass(self: *WireV, class: []const u8, alignment: Label.Alignment, text: []const u8) *WireV {
-    const style = if (self.options.bits > 1) self.state.drawing.style.bus_style else self.state.drawing.style.wire_style;
-    const item = self.state.createLabel(text, class, alignment, .normal, -90);
-    self.state.constrainOffset(&item._x, &self._x, -style.label_padding_y, "wire label x");
-    switch (alignment) {
-        .right => self.state.constrainOffset(&item._y, &self._y.min, style.label_padding_x, "wire label y from min"),
-        .center => self.state.constrainEql(&item._y, &self._y.mid, "wire label y from mid"),
-        .left => self.state.constrainOffset(&item._y, &self._y.max, -style.label_padding_x, "wire label y from max"),
+    var options_mut = options;
+    options_mut.angle = -90;
+    options_mut._class2 = if (self.options.bits > 1) "wire-label bus" else "wire-label";
+
+    const item = self.state.createLabel(text, options_mut);
+
+    if (options_mut.baseline == .middle) {
+        self.state.constrainEql(&item._x, &self._x, "wire label x");
+        switch (options_mut.alignment) {
+            .left, .center => self.state.constrainOffset(&item._y, &self._y.min, style.label_padding_cap, "wire label y from min"),
+            .right => self.state.constrainOffset(&item._y, &self._y.max, -style.label_padding_cap, "wire label y from max"),
+        }
+    } else {
+        switch (options_mut.baseline) {
+            .normal => self.state.constrainOffset(&item._x, &self._x, -style.label_padding_y, "wire label x"),
+            .hanging => self.state.constrainOffset(&item._x, &self._x, style.label_padding_y, "wire label x"),
+            .middle => unreachable,
+        }
+        switch (options_mut.alignment) {
+            .left => self.state.constrainOffset(&item._y, &self._y.max, -style.label_padding_x, "wire label y from max"),
+            .center => self.state.constrainEql(&item._y, &self._y.mid, "wire label y from mid"),
+            .right => self.state.constrainOffset(&item._y, &self._y.min, style.label_padding_x, "wire label y from min"),
+        }
     }
-    return self;
-}
-
-pub fn labelRight(self: *WireV, alignment: Label.Alignment, text: []const u8) *WireV {
-    const style = if (self.options.bits > 1) self.state.drawing.style.bus_style else self.state.drawing.style.wire_style;
-    return self.labelRightWithClass(style.default_label_class, alignment, text);
-}
-pub fn labelRightWithClass(self: *WireV, class: []const u8, alignment: Label.Alignment, text: []const u8) *WireV {
-    const style = if (self.options.bits > 1) self.state.drawing.style.bus_style else self.state.drawing.style.wire_style;
-    const item = self.state.createLabel(text, class, alignment, .hanging, -90);
-    self.state.constrainOffset(&item._x, &self._x, style.label_padding_y, "wire label y");
-    switch (alignment) {
-        .right => self.state.constrainOffset(&item._y, &self._y.min, style.label_padding_x, "wire label y from min"),
-        .center => self.state.constrainEql(&item._y, &self._y.mid, "wire label y from mid"),
-        .left => self.state.constrainOffset(&item._y, &self._y.max, -style.label_padding_x, "wire label y from max"),
-    }
-    return self;
-}
-
-pub fn labelTop(self: *WireV, text: []const u8) *WireV {
-    const style = if (self.options.bits > 1) self.state.drawing.style.bus_style else self.state.drawing.style.wire_style;
-    return self.labelTopWithClass(style.default_label_class, text);
-}
-pub fn labelTopWithClass(self: *WireV, class: []const u8, text: []const u8) *WireV {
-    const style = if (self.options.bits > 1) self.state.drawing.style.bus_style else self.state.drawing.style.wire_style;
-    const item = self.state.createLabel(text, class, .right, .middle, 0);
-    self.state.constrainEql(&item._y, &self._y, "wire label y");
-    self.state.constrainOffset(&item._x, &self._x.min, -style.label_padding_cap, "wire label x from min");
-    return self;
-}
-
-pub fn labelBottom(self: *WireV, text: []const u8) *WireV {
-    const style = if (self.options.bits > 1) self.state.drawing.style.bus_style else self.state.drawing.style.wire_style;
-    return self.labelBottomWithClass(style.default_label_class, text);
-}
-pub fn labelBottomWithClass(self: *WireV, class: []const u8, text: []const u8) *WireV {
-    const style = if (self.options.bits > 1) self.state.drawing.style.bus_style else self.state.drawing.style.wire_style;
-    const item = self.state.createLabel(text, class, .left, .middle, 0);
-    self.state.constrainEql(&item._y, &self._y, "wire label y");
-    self.state.constrainOffset(&item._x, &self._x.max, style.label_padding_cap, "wire label x from max");
     return self;
 }
 

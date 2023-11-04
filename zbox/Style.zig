@@ -1,28 +1,19 @@
-css: []const u8 = @embedFile("default.css"),
+base_css: []const u8 = @embedFile("default.css"),
+extra_css: []const u8 = "",
 
 drawing_padding_x: f64 = 25,
 drawing_padding_y: f64 = 25,
 
-default_box_class: []const u8 = "box",
-default_box_label_class: []const u8 = "box_label",
-default_box_width: f64 = 240,
-default_box_height: f64 = 120,
 box_padding_x: f64 = 8,
 box_padding_y: f64 = 10,
+box_label_line_height: f64 = 25,
 
-default_label_class: []const u8 = "label",
-
-default_interface_label_class: []const u8 = "interface_label",
 default_interface_spacing: f64 = 20,
 
-default_separator_class: []const u8 = "separator",
-default_separator_label_class: []const u8 = "separator_label",
 separator_label_padding_x: f64 = 8,
 separator_label_padding_y: f64 = 4,
 
 wire_style: WireStyle = .{
-    .default_class = "wire",
-    .default_label_class = "wire_label",
     .label_padding_x = 8,
     .label_padding_y = 3,
     .label_padding_cap = 5,
@@ -37,8 +28,6 @@ wire_style: WireStyle = .{
     .bit_mark_label_offset_y = 5,
 },
 bus_style: WireStyle = .{
-    .default_class = "bus",
-    .default_label_class = "bus_label",
     .label_padding_x = 8,
     .label_padding_y = 4,
     .label_padding_cap = 5,
@@ -54,8 +43,6 @@ bus_style: WireStyle = .{
 },
 
 pub const WireStyle = struct {
-    default_class: []const u8,
-    default_label_class: []const u8,
     label_padding_x: f64,
     label_padding_y: f64,
     label_padding_cap: f64,

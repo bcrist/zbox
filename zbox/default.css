@@ -1,7 +1,6 @@
 svg {
     background: #394150;
 }
-
 text {
     display: block;
     white-space-collapse: preserve;
@@ -10,24 +9,34 @@ text {
     font-family: Iosevka Custom, Iosevka, Inconsolata, Consolas, monospace;
     fill: #E5E9F0;
 }
-text.bitmark {
+text._nl { dominant-baseline: auto; text-anchor: start; }
+text._nc { dominant-baseline: auto; text-anchor: middle; }
+text._nr { dominant-baseline: auto; text-anchor: end; }
+text._ml { dominant-baseline: middle; text-anchor: start; }
+text._mc { dominant-baseline: middle; text-anchor: middle; }
+text._mr { dominant-baseline: middle; text-anchor: end; }
+text._hl { dominant-baseline: hanging; text-anchor: start; }
+text._hc { dominant-baseline: hanging; text-anchor: middle; }
+text._hr { dominant-baseline: hanging; text-anchor: end; }
+.box-label.main, .box-label.top, .box-label.bottom {
+    font-size: 25px;
+}
+.box-label.interface.interface, text.small.small.small {
+    font-size: 14px;
+}
+text.bitmark-label {
     stroke: none;
     fill: #E5E9F0;
     font-size: 9px;
 }
-text.box_label {
-    font-size: 25px;
-}
-
-.separator {
+.sep {
     stroke-width: 3;
     stroke: #262c38;
 }
-.separator_label {
+.sep-label {
     fill: #12161d;
     font-size: 18px;
 }
-
 .box {
     stroke-width: 2;
     stroke: #ECEFF4;
@@ -35,7 +44,6 @@ text.box_label {
     rx: 5;
     ry: 5;
 }
-
 .wire {
     stroke-width: 2;
     stroke: #A3BE8C;
@@ -47,18 +55,17 @@ text.box_label {
     fill: #A3BE8C;
     stroke: none;
 }
-
-.bus {
+.wire.bus {
     stroke-width: 4;
     stroke: #5E81AC;
     stroke-linecap: round;
     stroke-linejoin: round;
     fill: none;
 }
-.bus.junction {
+.wire.bus.junction {
     fill: #5E81AC;
     stroke: none;
 }
-line.bitmark {
+.wire.wire.bitmark {
     stroke-width: 1;
 }

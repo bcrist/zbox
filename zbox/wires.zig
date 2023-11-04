@@ -11,7 +11,7 @@ pub const ArrowStyle = enum {
 pub const Options = struct {
     bits: usize = 1,
     dir: ArrowStyle = .none,
-    class: ?[]const u8 = null,
+    class: []const u8 = "",
     corner_radius: ?f64 = null,
 };
 
