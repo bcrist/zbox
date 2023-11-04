@@ -217,6 +217,13 @@ pub fn leftSideWithClass(self: *Box, extra_class: []const u8, text: []const u8) 
         ._y = iy,
     };
 }
+pub fn getLeftSide(self: *Box, index: usize) PointRef {
+    return .{
+        .state = self.state,
+        ._x = &self._x.begin,
+        ._y = self.getLeftInterface().contents.items[index],
+    };
+}
 
 pub fn rightSide(self: *Box, text: []const u8) PointRef {
     return self.rightSideWithClass("", text);
@@ -238,6 +245,13 @@ pub fn rightSideWithClass(self: *Box, extra_class: []const u8, text: []const u8)
         .state = self.state,
         ._x = &self._x.end,
         ._y = iy,
+    };
+}
+pub fn getRightSide(self: *Box, index: usize) PointRef {
+    return .{
+        .state = self.state,
+        ._x = &self._x.end,
+        ._y = self.getRightInterface().contents.items[index],
     };
 }
 
@@ -265,6 +279,13 @@ pub fn topSideWithClass(self: *Box, extra_class: []const u8, text: []const u8) P
         ._y = &self._y.begin,
     };
 }
+pub fn getTopSide(self: *Box, index: usize) PointRef {
+    return .{
+        .state = self.state,
+        ._x = self.getTopInterface().contents.items[index],
+        ._y = &self._y.begin,
+    };
+}
 
 pub fn bottomSide(self: *Box, text: []const u8) PointRef {
     return self.bottomSideWithClass("", text);
@@ -288,6 +309,13 @@ pub fn bottomSideWithClass(self: *Box, extra_class: []const u8, text: []const u8
         .state = self.state,
         ._x = ix,
         ._y = &self._y.end,
+    };
+}
+pub fn getBottomSide(self: *Box, index: usize) PointRef {
+    return .{
+        .state = self.state,
+        ._x = self.getBottomInterface().contents.items[index],
+        ._y = &self._y.begin,
     };
 }
 

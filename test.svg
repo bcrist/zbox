@@ -105,10 +105,10 @@ text.bitmark-label {
 <rect x="-150" y="-200" width="300" height="400" class="box block "/>
 <text x="0" y="-12.5" class="label _mc block box-label main">Hello</text>
 <text x="0" y="12.5" class="label _mc block box-label main">World</text>
-<rect x="450" y="-200" width="30" height="30" class="box small "/>
-<text x="465" y="-185" class="label _mc small box-label main">^1</text>
-<path d="M 435 -135 V 15 L 495 -15 V -105 Z" class="box mux "/>
-<path d="M 545 -105 V -15 L 605 15 V -135 Z" class="box demux "/>
+<rect x="450" y="-200" width="25" height="25" class="box small "/>
+<text x="462.5" y="-187.5" class="label _mc small box-label main">^1</text>
+<path d="M 432.5 -140 V 10 L 492.5 -20 V -110 Z" class="box mux "/>
+<path d="M 542.5 -110 V -20 L 602.5 10 V -140 Z" class="box demux "/>
 <rect x="300" y="80" width="240" height="120" class="box block "/>
 <rect x="540" y="80" width="240" height="120" class="box block "/>
 <text x="-142" y="-190" class="label _hl block box-label top">ASDF</text>
