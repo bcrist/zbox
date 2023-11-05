@@ -5,7 +5,7 @@ bit_mark: ?f64 = null,
 _x: f64 = values.uninitialized,
 _y: Span = .{},
 
-pub fn x(self: *WireH) YRef {
+pub fn x(self: *WireV) YRef {
     return .{
         .state = self.state,
         ._x = &self._x,
