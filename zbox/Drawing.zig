@@ -104,6 +104,16 @@ pub fn someX(self: *Drawing) XRef {
     };
 }
 
+pub fn betweenX(self: *Drawing, a: XRef, b: XRef, f: f64) XRef {
+    const item = self.state.createValue(values.uninitialized);
+    self.state.constrainLerp(item, a._x, b._x, f, "betweenX");
+    return .{
+        .state = &self.state,
+        ._x = item,
+        .mut = false,
+    };
+}
+
 pub fn y(self: *Drawing, abs_y: f64) YRef {
     return .{
         .state = &self.state,
@@ -116,6 +126,16 @@ pub fn someY(self: *Drawing) YRef {
     return .{
         .state = &self.state,
         ._y = self.state.createValue(values.uninitialized),
+    };
+}
+
+pub fn betweenY(self: *Drawing, a: YRef, b: YRef, f: f64) YRef {
+    const item = self.state.createValue(values.uninitialized);
+    self.state.constrainLerp(item, a._y, b._y, f, "betweenY");
+    return .{
+        .state = &self.state,
+        ._y = item,
+        .mut = false,
     };
 }
 
