@@ -1,4 +1,4 @@
-state: *DrawingState,
+state: *Drawing_State,
 text: []const u8,
 options: Options,
 _x: f64 = values.uninitialized,
@@ -25,7 +25,7 @@ pub const Baseline = enum {
     hanging,
 };
 
-pub fn anchorPoint(self: *Label) PointRef {
+pub fn anchor_point(self: *Label) Point_Ref {
     return .{
         .state = self.state,
         ._x = &self._x,
@@ -33,11 +33,11 @@ pub fn anchorPoint(self: *Label) PointRef {
     };
 }
 
-pub fn addMissingConstraints(self: *Label) void {
-    if (values.isUninitialized(self._x)) {
+pub fn add_missing_constraints(self: *Label) void {
+    if (values.is_uninitialized(self._x)) {
         self._x = 0;
     }
-    if (values.isUninitialized(self._y)) {
+    if (values.is_uninitialized(self._y)) {
         self._y = 0;
     }
 }
@@ -54,7 +54,7 @@ pub fn debug(self: *Label, writer: anytype) !void {
 }
 
 const Label = @This();
-const PointRef = @import("PointRef.zig");
-const DrawingState = @import("DrawingState.zig");
+const Point_Ref = @import("Point_Ref.zig");
+const Drawing_State = @import("Drawing_State.zig");
 const values = @import("values.zig");
 const std = @import("std");

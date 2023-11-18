@@ -3,20 +3,20 @@ pub const values = @import("zbox/values.zig");
 
 pub const Drawing = @import("zbox/Drawing.zig");
 
-pub const XRef = @import("zbox/XRef.zig");
-pub const YRef = @import("zbox/YRef.zig");
-pub const PointRef = @import("zbox/PointRef.zig");
-pub const XRefCluster = @import("zbox/XRefCluster.zig");
-pub const YRefCluster = @import("zbox/YRefCluster.zig");
+pub const X_Ref = @import("zbox/X_Ref.zig");
+pub const Y_Ref = @import("zbox/Y_Ref.zig");
+pub const Point_Ref = @import("zbox/Point_Ref.zig");
+pub const X_Ref_Cluster = @import("zbox/X_Ref_Cluster.zig");
+pub const Y_Ref_Cluster = @import("zbox/Y_Ref_Cluster.zig");
 
 pub const Box = @import("zbox/Box.zig");
 pub const Label = @import("zbox/Label.zig");
 
-pub const WireH = @import("zbox/WireH.zig");
-pub const WireV = @import("zbox/WireV.zig");
+pub const Wire_H = @import("zbox/Wire_H.zig");
+pub const Wire_V = @import("zbox/Wire_V.zig");
 
-pub const SeparatorH = @import("zbox/SeparatorH.zig");
-pub const SeparatorV = @import("zbox/SeparatorV.zig");
+pub const Separator_H = @import("zbox/Separator_H.zig");
+pub const Separator_V = @import("zbox/Separator_V.zig");
 
 test "example" {
     var d = Drawing.init(std.testing.allocator);
@@ -26,112 +26,112 @@ test "example" {
     d.desc = "some descriptive words";
 
     const b = d.box(.{ .label = "Hello\nWorld" })
-        .topLabel(.left, "ASDF")
-        .bottomLabel(.right, "123abc")
+        .top_label(.left, "ASDF")
+        .bottom_label(.right, "123abc")
         ;
 
     _ = b.size(300, 400);
 
-    _ = b.rightSide("CLK");
-    _ = b.rightSide("D0");
-    _ = b.rightSide("D3");
-    _ = b.rightSide("");
+    _ = b.right_side("CLK");
+    _ = b.right_side("D0");
+    _ = b.right_side("D3");
+    _ = b.right_side("");
 
-    const asdf = b.leftSide("asdf").wireH(.{}).length(-50);
+    const asdf = b.left_side("asdf").wire_h(.{}).length(-50);
     _ = asdf.turn()
-        .turnAtOffset(b.top(), -50)
-        .turnAtOffset(b.right(), 50)
-        .turnAndEndAt(b.rightSide("asdf"))
+        .turn_at_offset(b.top(), -50)
+        .turn_at_offset(b.right(), 50)
+        .turn_and_end_at(b.right_side("asdf"))
         ;
 
     _ = asdf.turn().turn().y()
         .wire(.{ .dir = .junction_begin })
-        .endAtPoint(b.topSide("asdf"))
+        .end_at_point(b.top_side("asdf"))
         ;
 
     const small = d.box(.{ .shape = .small, .label = "^1" });
-    _ = small.topLeft().attachToOffset(b.topRight(), 300, 0);
+    _ = small.top_left().attach_to_offset(b.top_right(), 300, 0);
 
     const mux = d.box(.{ .shape = .mux });
-    _ = mux.topCenter().attachToOffset(small.bottomCenter(), 0, 50);
+    _ = mux.top_center().attach_to_offset(small.bottom_center(), 0, 50);
 
     const demux = d.box(.{ .shape = .demux });
-    _ = demux.middleLeft().attachToOffset(mux.middleRight(), 50, 0);
+    _ = demux.middle_left().attach_to_offset(mux.middle_right(), 50, 0);
 
-    _ = b.topSide("asd");
-    _ = b.topSide("asd2");
-    _ = b.topSide("asd3");
-    _ = b.bottomSide("Hello World!");
-    _ = b.bottomSide("Hellorld!");
+    _ = b.top_side("asd");
+    _ = b.top_side("asd2");
+    _ = b.top_side("asd3");
+    _ = b.bottom_side("Hello World!");
+    _ = b.bottom_side("Hellorld!");
 
     const b2 = d.box(.{});
 
-    _ = b2.left().attachToOffset(b.right(), 150);
-    _ = b2.bottom().attachTo(b.bottom());
+    _ = b2.left().attach_to_offset(b.right(), 150);
+    _ = b2.bottom().attach_to(b.bottom());
 
 
-    const halfway = d.someX().attachBetween(b.right(), b2.left(), 0.5);
+    const halfway = d.some_x().attach_between(b.right(), b2.left(), 0.5);
 
-    const sep = d.separatorV();
-    _ = sep.x().attachTo(halfway);
+    const sep = d.separator_v();
+    _ = sep.x().attach_to(halfway);
 
     _ = sep.label(d.y(0), "asdf1", .{});
     _ = sep.label(d.y(0), "asdf2", .{ .baseline = .hanging });
 
     const cols = d.columns();
-    _ = cols.center().attachBetween(b.right(), b2.left(), 0.5);
+    _ = cols.center().attach_between(b.right(), b2.left(), 0.5);
 
-    _ = b.rightSide("D4")
-        .wireH(.{ .bits = 32, .dir = .reverse })
-        .bitMark()
-        .turnAt(cols.push())
-        .bitMark()
+    _ = b.right_side("D4")
+        .wire_h(.{ .bits = 32, .dir = .reverse })
+        .bit_mark()
+        .turn_at(cols.push())
+        .bit_mark()
         .label("D4", .{ .baseline = .hanging, .alignment = .right })
-        .turnAndEndAt(b2.leftSide("IN"));
+        .turn_and_end_at(b2.left_side("IN"));
 
-    _ = b.rightSide("D5")
-        .wireH(.{ .dir = .junction_both })
-        .turnAt(cols.push())
-        .bitMarkAt(0.2)
+    _ = b.right_side("D5")
+        .wire_h(.{ .dir = .junction_both })
+        .turn_at(cols.push())
+        .bit_mark_at(0.2)
         .label("D5", .{})
-        .turnAndEndAt(b2.leftSide("IN2"));
+        .turn_and_end_at(b2.left_side("IN2"));
 
-    _ = b2.leftSide("aaa")
-        .wireH(.{})
-        .bitMark()
-        .endAtMutablePoint(b.rightSide("qqq"));
+    _ = b2.left_side("aaa")
+        .wire_h(.{})
+        .bit_mark()
+        .end_at_mutable_point(b.right_side("qqq"));
 
     cols.interface.flip();
 
     const b3 = d.box(.{});
-    _ = b2.bottomRight().attach(b3.bottomLeft());
+    _ = b2.bottom_right().attach(b3.bottom_left());
 
     const bus = d.point()
-        .attachToOffset(b.bottomLeft(), 0, 100)
-        .wireH(.{ .bits = 16 })
-        .bitMark()
+        .attach_to_offset(b.bottom_left(), 0, 100)
+        .wire_h(.{ .bits = 16 })
+        .bit_mark()
         ;
 
-    const bus2 = bus.continueAt(b.right()).endAt(b3.right());
+    const bus2 = bus.continue_at(b.right()).end_at(b3.right());
 
     _ = bus.endpoint()
-        .wireV(.{ .bits = 16, .dir = .junction_begin })
+        .wire_v(.{ .bits = 16, .dir = .junction_begin })
         .turn()
-        .endAtPoint(bus2.endpoint().offset(0, 100));
+        .end_at_point(bus2.endpoint().offset(0, 100));
 
     _ = bus.label("Hellorld", .{ .baseline = .middle, .alignment = .right });
     _ = bus2.label("Hello", .{});
     _ = bus2.label("fasdf", .{ .baseline = .middle, .alignment = .left });
 
-    _ = bus.y().wire(.{ .dir = .forward }).endAtPoint(b2.bottomSide("ABC"));
-    _ = bus.y().wire(.{ .dir = .reverse }).endAtPoint(b2.bottomSide("DEF"));
-    _ = b3.bottomSide("XYZ").wireV(.{ .dir = .forward }).endAt(bus.y());
-    _ = b3.bottomSide("123").wireV(.{ .dir = .reverse }).endAt(bus.y());
+    _ = bus.y().wire(.{ .dir = .forward }).end_at_point(b2.bottom_side("ABC"));
+    _ = bus.y().wire(.{ .dir = .reverse }).end_at_point(b2.bottom_side("DEF"));
+    _ = b3.bottom_side("XYZ").wire_v(.{ .dir = .forward }).end_at(bus.y());
+    _ = b3.bottom_side("123").wire_v(.{ .dir = .reverse }).end_at(bus.y());
 
 
     var f = try std.fs.cwd().createFile("test.svg", .{});
     defer f.close();
-    try d.renderSvg(f.writer());
+    try d.render_svg(f.writer());
 
     //try d.state.debug(std.io.getStdErr().writer());
 }

@@ -5,12 +5,12 @@ debug: []const u8,
 pub const Op = union(enum) {
     copy: *const f64,
 
-    offset_and_scale: OneOperandScaleOffset,
-    scale_and_offset: OneOperandScaleOffset,
+    offset_and_scale: One_Operand_Scale_Offset,
+    scale_and_offset: One_Operand_Scale_Offset,
 
-    scaled_difference: TwoOperandCoefficient,
-    scaled_offset: TwoOperandCoefficient,
-    lerp: TwoOperandCoefficient,
+    scaled_difference: Two_Operand_Coefficient,
+    scaled_offset: Two_Operand_Coefficient,
+    lerp: Two_Operand_Coefficient,
 
     difference: [2]*const f64,
     midpoint: [2]*const f64,
@@ -42,8 +42,8 @@ pub const Op = union(enum) {
 
     pub fn deps(self: *const Op) []const *const f64 {
         return switch (self.*) {
-            .copy => |*ptr| values.ptrToSlice(ptr),
-            .offset_and_scale, .scale_and_offset => |*info| values.ptrToSlice(&info.src),
+            .copy => |*ptr| values.ptr_to_slice(ptr),
+            .offset_and_scale, .scale_and_offset => |*info| values.ptr_to_slice(&info.src),
             .scaled_difference, .scaled_offset, .lerp => |*info| &info.operands,
             .difference, .midpoint, .sum2, .min2, .max2 => |*operands| operands,
             .sum, .product, .mean, .min, .max => |ptrs| ptrs,
@@ -179,13 +179,13 @@ pub const Op = union(enum) {
     }
 };
 
-pub const OneOperandScaleOffset = struct {
+pub const One_Operand_Scale_Offset = struct {
     src: *const f64,
     offset: f64,
     scale: f64,
 };
 
-pub const TwoOperandCoefficient = struct {
+pub const Two_Operand_Coefficient = struct {
     operands: [2]*const f64,
     k: f64,
 };

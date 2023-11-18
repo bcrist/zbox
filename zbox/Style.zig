@@ -13,7 +13,7 @@ default_interface_spacing: f64 = 20,
 separator_label_padding_x: f64 = 8,
 separator_label_padding_y: f64 = 4,
 
-wire_style: WireStyle = .{
+wire_style: Wire_Style = .{
     .label_padding_x = 8,
     .label_padding_y = 3,
     .label_padding_cap = 5,
@@ -27,7 +27,7 @@ wire_style: WireStyle = .{
     .bit_mark_label_offset_xy = 1,
     .bit_mark_label_offset_y = 5,
 },
-bus_style: WireStyle = .{
+bus_style: Wire_Style = .{
     .label_padding_x = 8,
     .label_padding_y = 4,
     .label_padding_cap = 5,
@@ -42,7 +42,7 @@ bus_style: WireStyle = .{
     .bit_mark_label_offset_y = 7,
 },
 
-pub const WireStyle = struct {
+pub const Wire_Style = struct {
     label_padding_x: f64,
     label_padding_y: f64,
     label_padding_cap: f64,

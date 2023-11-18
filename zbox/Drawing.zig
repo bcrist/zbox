@@ -1,4 +1,4 @@
-state: DrawingState,
+state: Drawing_State,
 style: Style = .{},
 title: []const u8 = "",
 desc: []const u8 = "",
@@ -19,18 +19,18 @@ pub fn deinit(self: *Drawing) void {
 }
 
 pub fn label(self: *Drawing, class: []const u8, alignment: Label.Alignment, baseline: Label.Baseline, text: []const u8) *Label {
-    return self.state.createLabel(text, class, alignment, baseline, 0);
+    return self.state.create_label(text, class, alignment, baseline, 0);
 }
-pub fn labelV(self: *Drawing, class: []const u8, alignment: Label.Alignment, baseline: Label.Baseline, text: []const u8) *Label {
-    return self.state.createLabel(text, class, alignment, baseline, -90);
+pub fn label_v(self: *Drawing, class: []const u8, alignment: Label.Alignment, baseline: Label.Baseline, text: []const u8) *Label {
+    return self.state.create_label(text, class, alignment, baseline, -90);
 }
 
 pub fn box(self: *Drawing, options: Box.Options) *Box {
-    return self.state.createBox(options);
+    return self.state.create_box(options);
 }
 
 // TODO cubic beziers - "swoopWest/East/North/South"
-// ends with "endWestAt/EastAt/NorthAt/SouthAt(PointRef)
+// ends with "endWestAt/EastAt/NorthAt/SouthAt(Point_Ref)
 
 // TODO Grouping rectangles
 // TODO Circles (for state diagrams)
@@ -48,65 +48,65 @@ pub fn box(self: *Drawing, options: Box.Options) *Box {
 // TODO simple tables
 // TODO railroad diagrams?
 
-pub fn separatorH(self: *Drawing) *SeparatorH {
-    return self.state.createSeparatorH();
+pub fn separator_h(self: *Drawing) *Separator_H {
+    return self.state.create_separator_h();
 }
 
-pub fn separatorV(self: *Drawing) *SeparatorV {
-    return self.state.createSeparatorV();
+pub fn separator_v(self: *Drawing) *Separator_V {
+    return self.state.create_separator_v();
 }
 
-pub fn columns(self: *Drawing) *XRefCluster {
-    return self.state.createXRefCluster();
+pub fn columns(self: *Drawing) *X_Ref_Cluster {
+    return self.state.create_x_ref_cluster();
 }
-pub fn rows(self: *Drawing) *YRefCluster {
-    return self.state.createYRefCluster();
-}
-
-pub fn wireH(self: *Drawing, options: wires.Options) *WireH {
-    return self.state.createWireH(options, null);
+pub fn rows(self: *Drawing) *Y_Ref_Cluster {
+    return self.state.create_y_ref_cluster();
 }
 
-pub fn wireV(self: *Drawing, options: wires.Options) *WireV {
-    return self.state.createWireV(options, null);
+pub fn wire_h(self: *Drawing, options: wires.Options) *Wire_H {
+    return self.state.create_wire_h(options, null);
 }
 
-pub fn at(self: *Drawing, abs_x: f64, abs_y: f64) PointRef {
+pub fn wire_v(self: *Drawing, options: wires.Options) *Wire_V {
+    return self.state.create_wire_v(options, null);
+}
+
+pub fn at(self: *Drawing, abs_x: f64, abs_y: f64) Point_Ref {
     return .{
         .state = &self.state,
-        ._x = self.state.createValue(abs_x),
-        ._y = self.state.createValue(abs_y),
+        ._x = self.state.create_value(abs_x),
+        ._y = self.state.create_value(abs_y),
         .mut_x = false,
         .mut_y = false,
     };
 }
 
-pub fn point(self: *Drawing) PointRef {
+pub fn point(self: *Drawing) Point_Ref {
     return .{
         .state = &self.state,
-        ._x = self.state.createValue(values.uninitialized),
-        ._y = self.state.createValue(values.uninitialized),
+        ._x = self.state.create_value(values.uninitialized),
+        ._y = self.state.create_value(values.uninitialized),
     };
 }
 
-pub fn x(self: *Drawing, abs_x: f64) XRef {
+pub fn x(self: *Drawing, abs_x: f64) X_Ref {
     return .{
         .state = &self.state,
-        ._x = self.state.createValue(abs_x),
+        ._x = self.state.create_value(abs_x),
         .mut = false,
     };
 }
 
-pub fn someX(self: *Drawing) XRef {
+pub fn some_x(self: *Drawing) X_Ref {
     return .{
         .state = &self.state,
-        ._x = self.state.createValue(values.uninitialized),
+        ._x = self.state.create_value(values.uninitialized),
     };
 }
 
-pub fn betweenX(self: *Drawing, a: XRef, b: XRef, f: f64) XRef {
-    const item = self.state.createValue(values.uninitialized);
-    self.state.constrainLerp(item, a._x, b._x, f, "betweenX");
+pub fn between_x(self: *Drawing, a: X_Ref, b: X_Ref, f: f64) X_Ref {
+    const item = self.state.create_value(values.uninitialized);
+    self.state.constrain_lerp(item, a._x, b._x, f, "between_x");
     return .{
         .state = &self.state,
         ._x = item,
@@ -114,24 +114,24 @@ pub fn betweenX(self: *Drawing, a: XRef, b: XRef, f: f64) XRef {
     };
 }
 
-pub fn y(self: *Drawing, abs_y: f64) YRef {
+pub fn y(self: *Drawing, abs_y: f64) Y_Ref {
     return .{
         .state = &self.state,
-        ._y = self.state.createValue(abs_y),
+        ._y = self.state.create_value(abs_y),
         .mut = false,
     };
 }
 
-pub fn someY(self: *Drawing) YRef {
+pub fn some_y(self: *Drawing) Y_Ref {
     return .{
         .state = &self.state,
-        ._y = self.state.createValue(values.uninitialized),
+        ._y = self.state.create_value(values.uninitialized),
     };
 }
 
-pub fn betweenY(self: *Drawing, a: YRef, b: YRef, f: f64) YRef {
-    const item = self.state.createValue(values.uninitialized);
-    self.state.constrainLerp(item, a._y, b._y, f, "betweenY");
+pub fn between_y(self: *Drawing, a: Y_Ref, b: Y_Ref, f: f64) Y_Ref {
+    const item = self.state.create_value(values.uninitialized);
+    self.state.constrain_lerp(item, a._y, b._y, f, "between_y");
     return .{
         .state = &self.state,
         ._y = item,
@@ -139,11 +139,11 @@ pub fn betweenY(self: *Drawing, a: YRef, b: YRef, f: f64) YRef {
     };
 }
 
-pub fn renderSvg(self: *Drawing, writer: anytype) !void {
-    self.state.addMissingConstraints();
-    try self.state.resolveConstraints();
+pub fn render_svg(self: *Drawing, writer: anytype) !void {
+    self.state.add_missing_constraints();
+    try self.state.resolve_constraints();
 
-    const computed_view = self.computeViewport();
+    const computed_view = self.compute_viewport();
     const view: Viewport = .{
         .left = self.view.left orelse computed_view.left,
         .right = self.view.right orelse computed_view.right,
@@ -203,24 +203,24 @@ pub fn renderSvg(self: *Drawing, writer: anytype) !void {
     }
 
     for (self.state.wires_h.items) |w| {
-        try self.renderSvgWire(wires.WireRef.initH(w), writer);
+        try self.render_svg_wire(wires.Wire_Ref.initH(w), writer);
     }
     for (self.state.wires_v.items) |w| {
-        try self.renderSvgWire(wires.WireRef.initV(w), writer);
+        try self.render_svg_wire(wires.Wire_Ref.initV(w), writer);
     }
 
     for (self.state.boxes.items) |b| {
-        try self.renderSvgBox(b, writer);
+        try self.render_svg_box(b, writer);
     }
 
     for (self.state.labels.items) |l| {
-        try renderSvgLabel(l._x, l._y, l.text, l.options, writer);
+        try render_svg_label(l._x, l._y, l.text, l.options, writer);
     }
 
     try writer.writeAll("</svg>");
 }
 
-fn renderSvgBox(self: *Drawing, b: *Box, writer: anytype) @TypeOf(writer).Error!void {
+fn render_svg_box(self: *Drawing, b: *Box, writer: anytype) @TypeOf(writer).Error!void {
     switch (b.options.shape) {
         .mux => {
             const dy = b._x.len / 4;
@@ -274,7 +274,7 @@ fn renderSvgBox(self: *Drawing, b: *Box, writer: anytype) @TypeOf(writer).Error!
 
         var iter = std.mem.splitScalar(u8, b.options.label, '\n');
         while (iter.next()) |line| {
-            try renderSvgLabel(tx, ty, line, .{
+            try render_svg_label(tx, ty, line, .{
                 .class = b.options.label_class,
                 ._class1 = @tagName(b.options.shape),
                 ._class2 = "box-label main",
@@ -286,7 +286,7 @@ fn renderSvgBox(self: *Drawing, b: *Box, writer: anytype) @TypeOf(writer).Error!
     }
 }
 
-fn renderSvgLabel(lx: f64, ly: f64, text: []const u8, options: Label.Options, writer: anytype) @TypeOf(writer).Error!void {
+fn render_svg_label(lx: f64, ly: f64, text: []const u8, options: Label.Options, writer: anytype) @TypeOf(writer).Error!void {
     try writer.print(
         \\<text x="{d}" y="{d}" class="label _{s}{s}
     , .{
@@ -315,7 +315,7 @@ fn renderSvgLabel(lx: f64, ly: f64, text: []const u8, options: Label.Options, wr
     , .{ text });
 }
 
-fn renderSvgWire(self: *Drawing, wire: wires.WireRef, writer: anytype) @TypeOf(writer).Error!void {
+fn render_svg_wire(self: *Drawing, wire: wires.Wire_Ref, writer: anytype) @TypeOf(writer).Error!void {
     const options = wire.options();
     const style = if (options.bits > 1) self.style.bus_style else self.style.wire_style;
 
@@ -361,7 +361,7 @@ fn renderSvgWire(self: *Drawing, wire: wires.WireRef, writer: anytype) @TypeOf(w
         const end = final_segment.end();
         const dx = end._x.* - begin._x.*;
         const dy = end._y.* - begin._y.*;
-        try renderSvgArrowheadPath(dx, dy, style, writer);
+        try render_svg_arrowhead_path(dx, dy, style, writer);
     }
 
     if (draw_start_arrow) {
@@ -370,7 +370,7 @@ fn renderSvgWire(self: *Drawing, wire: wires.WireRef, writer: anytype) @TypeOf(w
         const dx = begin._x.* - end._x.*;
         const dy = begin._y.* - end._y.*;
         try writer.print(" M {d} {d}", .{ begin._x.*, begin._y.* });
-        try renderSvgArrowheadPath(dx, dy, style, writer);
+        try render_svg_arrowhead_path(dx, dy, style, writer);
     }
 
     try writer.writeAll("\" class=\"wire");
@@ -380,7 +380,7 @@ fn renderSvgWire(self: *Drawing, wire: wires.WireRef, writer: anytype) @TypeOf(w
 
     iter = .{ .wire = wire };
     while (iter.next()) |segment| {
-        if (segment.bitMark()) |f| {
+        if (segment.bit_mark()) |f| {
             const begin = segment.begin();
             const end = segment.end();
             const cx = (1-f)*begin._x.* + f*end._x.*;
@@ -403,12 +403,12 @@ fn renderSvgWire(self: *Drawing, wire: wires.WireRef, writer: anytype) @TypeOf(w
             const text = try std.fmt.bufPrint(&buf, "{}", .{ options.bits });
 
             switch (segment) {
-                .H => try renderSvgLabel(cx, cy + style.bit_mark_label_offset_y, text, .{
+                .H => try render_svg_label(cx, cy + style.bit_mark_label_offset_y, text, .{
                     .alignment = .center,
                     .baseline = .hanging,
                     .class = "bitmark-label",
                 }, writer),
-                .V => try renderSvgLabel(cx + style.bit_mark_label_offset_x, cy + style.bit_mark_label_offset_xy, text, .{
+                .V => try render_svg_label(cx + style.bit_mark_label_offset_x, cy + style.bit_mark_label_offset_xy, text, .{
                     .alignment = .left,
                     .baseline = .middle,
                     .class = "bitmark-label",
@@ -439,7 +439,7 @@ fn renderSvgWire(self: *Drawing, wire: wires.WireRef, writer: anytype) @TypeOf(w
     }
 }
 
-fn renderSvgArrowheadPath(dx: f64, dy: f64, wire_style: Style.WireStyle, writer: anytype) @TypeOf(writer).Error!void {
+fn render_svg_arrowhead_path(dx: f64, dy: f64, wire_style: Style.Wire_Style, writer: anytype) @TypeOf(writer).Error!void {
     var tangent_x: f64 = if (dx > 0) 1 else if (dx < 0) -1 else 0;
     var tangent_y: f64 = if (dy > 0) 1 else if (dy < 0) -1 else 0;
 
@@ -466,18 +466,18 @@ fn renderSvgArrowheadPath(dx: f64, dy: f64, wire_style: Style.WireStyle, writer:
     });
 }
 
-fn computeViewport(self: *Drawing) Viewport {
+fn compute_viewport(self: *Drawing) Viewport {
     var view: Viewport = .{};
 
     for (self.state.wires_h.items) |h_wire| {
-        var maybe_wire: ?*WireH = h_wire;
+        var maybe_wire: ?*Wire_H = h_wire;
         while (maybe_wire) |w| {
-            view.includePoint(w._x.begin, w._y);
-            view.includePoint(w._x.end, w._y);
+            view.include_point(w._x.begin, w._y);
+            view.include_point(w._x.end, w._y);
 
             if (w.next) |vw| {
-                view.includePoint(vw._x, vw._y.begin);
-                view.includePoint(vw._x, vw._y.end);
+                view.include_point(vw._x, vw._y.begin);
+                view.include_point(vw._x, vw._y.end);
 
                 maybe_wire = vw.next;
             } else {
@@ -486,14 +486,14 @@ fn computeViewport(self: *Drawing) Viewport {
         }
     }
     for (self.state.wires_v.items) |v_wire| {
-        var maybe_wire: ?*WireV = v_wire;
+        var maybe_wire: ?*Wire_V = v_wire;
         while (maybe_wire) |w| {
-            view.includePoint(w._x, w._y.begin);
-            view.includePoint(w._x, w._y.end);
+            view.include_point(w._x, w._y.begin);
+            view.include_point(w._x, w._y.end);
 
             if (w.next) |hw| {
-                view.includePoint(hw._x.begin, hw._y);
-                view.includePoint(hw._x.end, hw._y);
+                view.include_point(hw._x.begin, hw._y);
+                view.include_point(hw._x.end, hw._y);
 
                 maybe_wire = hw.next;
             } else {
@@ -503,12 +503,12 @@ fn computeViewport(self: *Drawing) Viewport {
     }
 
     for (self.state.boxes.items) |b| {
-        view.includePoint(b._x.begin, b._y.begin);
-        view.includePoint(b._x.end, b._y.end);
+        view.include_point(b._x.begin, b._y.begin);
+        view.include_point(b._x.end, b._y.end);
     }
 
     for (self.state.labels.items) |l| {
-        view.includePoint(l._x, l._y);
+        view.include_point(l._x, l._y);
     }
 
     view.left = (view.left orelse 0) - self.style.drawing_padding_x;
@@ -521,18 +521,18 @@ fn computeViewport(self: *Drawing) Viewport {
 }
 
 const Drawing = @This();
-const DrawingState = @import("DrawingState.zig");
-const PointRef = @import("PointRef.zig");
-const XRef = @import("XRef.zig");
-const YRef = @import("YRef.zig");
-const XRefCluster = @import("XRefCluster.zig");
-const YRefCluster = @import("YRefCluster.zig");
+const Drawing_State = @import("Drawing_State.zig");
+const Point_Ref = @import("Point_Ref.zig");
+const X_Ref = @import("X_Ref.zig");
+const Y_Ref = @import("Y_Ref.zig");
+const X_Ref_Cluster = @import("X_Ref_Cluster.zig");
+const Y_Ref_Cluster = @import("Y_Ref_Cluster.zig");
 const Box = @import("Box.zig");
-const SeparatorH = @import("SeparatorH.zig");
-const SeparatorV = @import("SeparatorV.zig");
+const Separator_H = @import("Separator_H.zig");
+const Separator_V = @import("Separator_V.zig");
 const wires = @import("wires.zig");
-const WireH = @import("WireH.zig");
-const WireV = @import("WireV.zig");
+const Wire_H = @import("Wire_H.zig");
+const Wire_V = @import("Wire_V.zig");
 const Interface = @import("Interface.zig");
 const Label = @import("Label.zig");
 const Constraint = @import("Constraint.zig");

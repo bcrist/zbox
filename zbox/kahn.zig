@@ -1,7 +1,7 @@
 /// A standard topological sort
 pub fn sort(arena: std.mem.Allocator, constraints: []Constraint) !void {
-    var open_nodes = OpenNodeList.initCapacity(arena, constraints.len) catch @panic("OOM");
-    const nodes = initNodes(arena, constraints, &open_nodes);
+    var open_nodes = Open_Node_List.initCapacity(arena, constraints.len) catch @panic("OOM");
+    const nodes = init_nodes(arena, constraints, &open_nodes);
     _ = nodes;
 
     var out_index: usize = 0;
@@ -14,7 +14,7 @@ pub fn sort(arena: std.mem.Allocator, constraints: []Constraint) !void {
         out_index += 1;
 
         for (node.successors) |successor| {
-            successor.removeAntecedent(node);
+            successor.remove_antecedent(node);
             if (successor.antecedents.len == 0) {
                 open_nodes.appendAssumeCapacity(successor);
             }
@@ -27,7 +27,7 @@ pub fn sort(arena: std.mem.Allocator, constraints: []Constraint) !void {
     }
 }
 
-fn initNodes(arena: std.mem.Allocator, constraints: []Constraint, open_nodes: *OpenNodeList) []Node {
+fn init_nodes(arena: std.mem.Allocator, constraints: []Constraint, open_nodes: *Open_Node_List) []Node {
     var nodes = arena.alloc(Node, constraints.len) catch @panic("OOM");
     var ptr_to_node = ShallowAutoHashMap(*const f64, *Node).init(arena);
 
@@ -58,8 +58,8 @@ fn initNodes(arena: std.mem.Allocator, constraints: []Constraint, open_nodes: *O
     for (constraints, nodes) |constraint, *node| {
         for (constraint.op.deps()) |ptr| {
             if (ptr_to_node.get(ptr)) |antecedent| {
-                node.addAntecedent(antecedent);
-                antecedent.addSuccessor(node);
+                node.add_antecedent(antecedent);
+                antecedent.add_successor(node);
             }
         }
         if (node.antecedents.len == 0) {
@@ -75,12 +75,12 @@ const Node = struct {
     antecedents: []*Node,
     successors: []*Node,
 
-    pub fn addAntecedent(self: *Node, antecedent: *Node) void {
+    pub fn add_antecedent(self: *Node, antecedent: *Node) void {
         self.antecedents.len += 1;
         self.antecedents[self.antecedents.len - 1] = antecedent;
     }
 
-    pub fn removeAntecedent(self: *Node, antecedent: *Node) void {
+    pub fn remove_antecedent(self: *Node, antecedent: *Node) void {
         for (0.., self.antecedents) |i, node| {
             if (node == antecedent) {
                 self.antecedents[i] = self.antecedents[self.antecedents.len - 1];
@@ -91,14 +91,14 @@ const Node = struct {
         std.debug.assert(false); // antecedent not found
     }
 
-    pub fn addSuccessor(self: *Node, successor: *Node) void {
+    pub fn add_successor(self: *Node, successor: *Node) void {
         self.successors.len += 1;
         self.successors[self.successors.len - 1] = successor;
     }
 
 };
 
-const OpenNodeList = std.ArrayListUnmanaged(*Node);
+const Open_Node_List = std.ArrayListUnmanaged(*Node);
 const Constraint = @import("Constraint.zig");
 const ShallowAutoHashMap = @import("deep_hash_map").ShallowAutoHashMap;
 const std = @import("std");

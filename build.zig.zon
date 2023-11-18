@@ -1,10 +1,17 @@
 .{
     .name = "ZBox",
-    .version = "1.0.0",
+    .version = "1.1.0",
+    .minimum_zig_version = "0.12.0-dev.1591+3fc6a2f11",
     .dependencies = .{
         .@"Zig-DeepHashMap" = .{
             .url = "https://github.com/bcrist/Zig-DeepHashMap/archive/7fa902f6721b2cb0ebcb6677a705cd6b525cd4d7.tar.gz",
             .hash = "12201a8c1ceb731f541d0eb4f37174129413643f6abf1e5cf18681e6c6555f5390de",
         },
+    },
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+        "zbox.zig",
+        "zbox",
     },
 }

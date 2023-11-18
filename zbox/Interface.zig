@@ -1,12 +1,12 @@
 // TODO consider alternative names for this struct that are more descriptive
 
-state: *DrawingState,
+state: *Drawing_State,
 contents: std.ArrayListUnmanaged(*f64) = .{},
 spacing: f64 = values.uninitialized,
 span: Span = .{},
 
 pub fn push(self: *Interface) *f64 {
-    const item = self.state.createValue(values.uninitialized);
+    const item = self.state.create_value(values.uninitialized);
     self.contents.append(self.state.gpa, item) catch @panic("OOM");
     return item;
 }
@@ -21,10 +21,10 @@ pub fn flip(self: *Interface) void {
     }
 }
 
-pub fn addMissingConstraints(self: *Interface) void {
+pub fn add_missing_constraints(self: *Interface) void {
     var spaces: usize = 0;
     for (self.contents.items) |item| {
-        if (values.isUninitialized(item.*)) {
+        if (values.is_uninitialized(item.*)) {
             spaces += 1;
         }
     }
@@ -32,20 +32,20 @@ pub fn addMissingConstraints(self: *Interface) void {
 
     const spaces_f64: f64 = @floatFromInt(spaces);
 
-    if (values.isUninitialized(self.spacing)) {
+    if (values.is_uninitialized(self.spacing)) {
         const divisor: f64 = if (spaces == 0) 1 else spaces_f64;
-        self.state.constrainScale(&self.spacing, &self.span.delta, 1 / divisor, "interface spacing from span delta");
+        self.state.constrain_scale(&self.spacing, &self.span.delta, 1 / divisor, "interface spacing from span delta");
     } else {
-        self.state.constrainScale(&self.span.delta, &self.spacing, spaces_f64, "interface span delta from spacing");
+        self.state.constrain_scale(&self.span.delta, &self.spacing, spaces_f64, "interface span delta from spacing");
 
-        // Ensure that delta won't be clobbered by addMissingConstraints below.
-        if (!values.isUninitialized(self.span.mid)) {
+        // Ensure that delta won't be clobbered by add_missing_constraints below.
+        if (!values.is_uninitialized(self.span.mid)) {
             self.span.begin = values.uninitialized;
             self.span.end = values.uninitialized;
-        } else if (!values.isUninitialized(self.span.begin)) {
+        } else if (!values.is_uninitialized(self.span.begin)) {
             self.span.mid = values.uninitialized;
             self.span.end = values.uninitialized;
-        } else if (!values.isUninitialized(self.span.end)) {
+        } else if (!values.is_uninitialized(self.span.end)) {
             self.span.begin = values.uninitialized;
             self.span.mid = values.uninitialized;
         }
@@ -53,13 +53,13 @@ pub fn addMissingConstraints(self: *Interface) void {
 
     var i: f64 = 0;
     for (self.contents.items) |ptr| {
-        if (values.isUninitialized(ptr.*)) {
-            self.state.constrainScaledOffset(ptr, &self.span.begin, &self.spacing, i, "interface item from span begin/spacing");
+        if (values.is_uninitialized(ptr.*)) {
+            self.state.constrain_scaled_offset(ptr, &self.span.begin, &self.spacing, i, "interface item from span begin/spacing");
             i += 1;
         }
     }
 
-    self.span.addMissingConstraints(self.state, 0, self.state.drawing.style.default_interface_spacing * spaces_f64);
+    self.span.add_missing_constraints(self.state, 0, self.state.drawing.style.default_interface_spacing * spaces_f64);
 }
 
 pub fn debug(self: *Interface, writer: anytype) !void {
@@ -70,6 +70,6 @@ pub fn debug(self: *Interface, writer: anytype) !void {
 
 const Interface = @This();
 const Span = @import("Span.zig");
-const DrawingState = @import("DrawingState.zig");
+const Drawing_State = @import("Drawing_State.zig");
 const values = @import("values.zig");
 const std = @import("std");

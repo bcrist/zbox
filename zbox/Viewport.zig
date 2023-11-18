@@ -21,7 +21,7 @@ pub fn height(self: Viewport) f64 {
     return 0;
 }
 
-pub fn includePoint(self: *Viewport, x: f64, y: f64) void {
+pub fn include_point(self: *Viewport, x: f64, y: f64) void {
     self.left = if (self.left) |left| @min(left, x) else x;
     self.right = if (self.right) |right| @max(right, x) else x;
     self.top = if (self.top) |top| @min(top, y) else y;

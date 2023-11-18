@@ -1,4 +1,4 @@
-pub const ArrowStyle = enum {
+pub const Arrow_Style = enum {
     none,
     forward,
     reverse,
@@ -10,30 +10,30 @@ pub const ArrowStyle = enum {
 
 pub const Options = struct {
     bits: usize = 1,
-    dir: ArrowStyle = .none,
+    dir: Arrow_Style = .none,
     class: []const u8 = "",
     corner_radius: ?f64 = null,
 };
 
-pub const WireRef = union(enum) {
-    H: *WireH,
-    V: *WireV,
+pub const Wire_Ref = union(enum) {
+    H: *Wire_H,
+    V: *Wire_V,
 
-    pub fn initH(wire: *WireH) WireRef {
+    pub fn initH(wire: *Wire_H) Wire_Ref {
         return .{ .H = wire };
     }
-    pub fn initV(wire: *WireV) WireRef {
+    pub fn initV(wire: *Wire_V) Wire_Ref {
         return .{ .V = wire };
     }
 
-    pub fn options(self: WireRef) Options {
+    pub fn options(self: Wire_Ref) Options {
         return switch (self) {
             .H => |w| w.options,
             .V => |w| w.options,
         };
     }
 
-    pub fn begin(self: WireRef) PointRef {
+    pub fn begin(self: Wire_Ref) Point_Ref {
         return switch (self) {
             .H => |w| .{
                 .state = w.state,
@@ -48,7 +48,7 @@ pub const WireRef = union(enum) {
         };
     }
 
-    pub fn end(self: WireRef) PointRef {
+    pub fn end(self: Wire_Ref) Point_Ref {
         return switch (self) {
             .H => |w| .{
                 .state = w.state,
@@ -63,22 +63,22 @@ pub const WireRef = union(enum) {
         };
     }
 
-    pub fn bitMark(self: WireRef) ?f64 {
+    pub fn bit_mark(self: Wire_Ref) ?f64 {
         return switch (self) {
-            .H => |w| w.bit_mark,
-            .V => |w| w.bit_mark,
+            .H => |w| w.bit_mark_location,
+            .V => |w| w.bit_mark_location,
         };
     }
 };
 
 pub const Iterator = struct {
-    wire: ?WireRef,
+    wire: ?Wire_Ref,
 
-    pub fn next(self: *Iterator) ?WireRef {
+    pub fn next(self: *Iterator) ?Wire_Ref {
         if (self.wire) |wire| {
             self.wire = switch (wire) {
-                .H => |w| if (w.next) |n| WireRef.initV(n) else null,
-                .V => |w| if (w.next) |n| WireRef.initH(n) else null,
+                .H => |w| if (w.next) |n| Wire_Ref.initV(n) else null,
+                .V => |w| if (w.next) |n| Wire_Ref.initH(n) else null,
             };
             return wire;
         }
@@ -87,6 +87,6 @@ pub const Iterator = struct {
 
 };
 
-const WireH = @import("WireH.zig");
-const WireV = @import("WireV.zig");
-const PointRef = @import("PointRef.zig");
+const Wire_H = @import("Wire_H.zig");
+const Wire_V = @import("Wire_V.zig");
+const Point_Ref = @import("Point_Ref.zig");
