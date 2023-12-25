@@ -28,7 +28,7 @@ pub fn sort(arena: std.mem.Allocator, constraints: []Constraint) !void {
 }
 
 fn init_nodes(arena: std.mem.Allocator, constraints: []Constraint, open_nodes: *Open_Node_List) []Node {
-    var nodes = arena.alloc(Node, constraints.len) catch @panic("OOM");
+    const nodes = arena.alloc(Node, constraints.len) catch @panic("OOM");
     var ptr_to_node = ShallowAutoHashMap(*const f64, *Node).init(arena);
 
     for (constraints, nodes) |constraint, *node| {

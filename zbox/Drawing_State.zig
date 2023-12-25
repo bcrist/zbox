@@ -51,7 +51,7 @@ pub fn print(self: *Drawing_State, comptime fmt: []const u8, args: anytype) []co
 
 pub fn create_value(self: *Drawing_State, initial_value: f64) *f64 {
     const arena = self.arena.allocator();
-    var item = arena.create(f64) catch @panic("OOM");
+    const item = arena.create(f64) catch @panic("OOM");
     item.* = initial_value;
     self.loose_values.append(self.gpa, item) catch @panic("OOM");
     return item;
