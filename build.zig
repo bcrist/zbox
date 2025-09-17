@@ -1,20 +1,24 @@
-const std = @import("std");
-
 pub fn build(b: *std.Build) void {
-    const deep_hash_map = b.dependency("Zig-DeepHashMap", .{}).module("deep_hash_map");
+    const deep_hash_map = b.dependency("deep_hash_map", .{}).module("deep_hash_map");
 
     const zbox = b.addModule("zbox", .{
-        .root_source_file = .{ .path = "zbox.zig" },
+        .root_source_file = b.path("zbox.zig"),
+        .imports = &.{
+            .{ .name = "deep_hash_map", .module = deep_hash_map },
+        },
     });
-    zbox.addImport("deep_hash_map", deep_hash_map);
 
     const tests = b.addTest(.{
-        .root_source_file = .{ .path = "zbox.zig"},
-        .target = b.standardTargetOptions(.{}),
-        .optimize = b.standardOptimizeOption(.{}),
+        .root_module = b.createModule(.{
+            .root_source_file = b.path("tests.zig"),
+            .target = b.standardTargetOptions(.{}),
+            .optimize = b.standardOptimizeOption(.{}),
+            .imports = &.{
+                .{ .name = "zbox", .module = zbox },
+            },
+        }),
     });
-    tests.root_module.addImport("deep_hash_map", deep_hash_map);
-    const run_tests = b.addRunArtifact(tests);
-    const test_step = b.step("test", "Run all tests");
-    test_step.dependOn(&run_tests.step);
+    b.step("test", "Run all tests").dependOn(&b.addRunArtifact(tests).step);
 }
+
+const std = @import("std");

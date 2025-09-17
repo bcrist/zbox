@@ -376,8 +376,11 @@ fn add_missing_interface_constraints(self: *Box, interface: *Interface, default_
     interface.add_missing_constraints();
 }
 
-pub fn debug(self: *Box, writer: anytype) !void {
-    try writer.print("Box: {s}\n", .{ self.class });
+pub fn debug(self: *Box, writer: *std.io.Writer) !void {
+    try writer.print("Box ({t}): {s}\n", .{
+        self.options.shape,
+        self.options.class,
+    });
     try writer.writeAll("   x: ");
     try self._x.debug(writer);
     try writer.writeAll("   y: ");

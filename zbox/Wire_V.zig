@@ -176,8 +176,8 @@ pub fn add_missing_constraints(self: *Wire_V) void {
     self._y.add_missing_constraints(self.state, 0, style.default_length);
 }
 
-pub fn debug(self: *Wire_V, writer: anytype) @TypeOf(writer).Error!void {
-    try writer.print("Wire_V: {?s}\n   x: {d}\n   y: ", .{
+pub fn debug(self: *Wire_V, writer: *std.io.Writer) error{WriteFailed}!void {
+    try writer.print("Wire_V: {s}\n   x: {d}\n   y: ", .{
         self.options.class,
         self._x,
     });

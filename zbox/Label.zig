@@ -42,11 +42,11 @@ pub fn add_missing_constraints(self: *Label) void {
     }
 }
 
-pub fn debug(self: *Label, writer: anytype) !void {
-    try writer.print("Label: {s} {s} {s} {s}\n", .{
-        self.class,
-        @tagName(self.alignment),
-        @tagName(self.baseline),
+pub fn debug(self: *Label, writer: *std.io.Writer) error{WriteFailed}!void {
+    try writer.print("Label: {s} {t} {t} {s}\n", .{
+        self.options.class,
+        self.options.alignment,
+        self.options.baseline,
         self.text,
     });
     try writer.print("   x: {d}\n", .{ self._x });

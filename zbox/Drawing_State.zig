@@ -278,7 +278,7 @@ pub fn remove_constraint(self: *Drawing_State, val: *f64) void {
     _ = self.constraints.remove(val);
 }
 
-pub fn debug(self: *Drawing_State, writer: anytype) !void {
+pub fn debug(self: *Drawing_State, writer: *std.io.Writer) error{WriteFailed}!void {
     for (self.x_ref_clusters.items) |c| {
         try c.debug(writer);
     }

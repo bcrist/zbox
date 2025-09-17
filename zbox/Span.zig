@@ -83,7 +83,7 @@ fn default_mid(self: *Span, state: *Drawing_State) void {
     state.constrain_midpoint(&self.mid, &self.begin, &self.end, "default span mid");
 }
 
-pub fn debug(self: *Span, writer: anytype) !void {
+pub fn debug(self: *Span, writer: *std.io.Writer) error{WriteFailed}!void {
     try writer.print("begin: {d}   mid: {d}   end: {d}   delta: {d}   min: {d}   max: {d}   len: {d}\n", .{
         self.begin, self.mid, self.end, self.delta,
         self.min, self.max, self.len,

@@ -6,7 +6,7 @@ pub fn sort(arena: std.mem.Allocator, constraints: []Constraint) !void {
 
     var out_index: usize = 0;
     while (open_nodes.items.len > 0) {
-        var node = open_nodes.pop();
+        var node = open_nodes.pop().?;
 
         std.debug.assert(node.antecedents.len == 0);
 

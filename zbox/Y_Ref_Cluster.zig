@@ -35,7 +35,7 @@ pub fn push(self: *Y_Ref_Cluster) Y_Ref {
     };
 }
 
-pub fn debug(self: *Y_Ref_Cluster, writer: anytype) !void {
+pub fn debug(self: *Y_Ref_Cluster, writer: *std.io.Writer) error{WriteFailed}!void {
     try writer.writeAll("Y_Ref_Cluster: ");
     try self.interface.debug(writer);
 }

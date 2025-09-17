@@ -139,7 +139,7 @@ pub fn between_y(self: *Drawing, a: Y_Ref, b: Y_Ref, f: f64) Y_Ref {
     };
 }
 
-pub fn render_svg(self: *Drawing, writer: anytype) !void {
+pub fn render_svg(self: *Drawing, writer: *std.io.Writer) !void {
     self.state.add_missing_constraints();
     try self.state.resolve_constraints();
 
@@ -220,7 +220,7 @@ pub fn render_svg(self: *Drawing, writer: anytype) !void {
     try writer.writeAll("</svg>");
 }
 
-fn render_svg_box(self: *Drawing, b: *Box, writer: anytype) @TypeOf(writer).Error!void {
+fn render_svg_box(self: *Drawing, b: *Box, writer: *std.io.Writer) !void {
     switch (b.options.shape) {
         .mux => {
             const dy = b._x.len / 4;
@@ -286,7 +286,7 @@ fn render_svg_box(self: *Drawing, b: *Box, writer: anytype) @TypeOf(writer).Erro
     }
 }
 
-fn render_svg_label(lx: f64, ly: f64, text: []const u8, options: Label.Options, writer: anytype) @TypeOf(writer).Error!void {
+fn render_svg_label(lx: f64, ly: f64, text: []const u8, options: Label.Options, writer: *std.io.Writer) !void {
     try writer.print(
         \\<text x="{d}" y="{d}" class="label _{s}{s}
     , .{
@@ -315,7 +315,7 @@ fn render_svg_label(lx: f64, ly: f64, text: []const u8, options: Label.Options, 
     , .{ text });
 }
 
-fn render_svg_wire(self: *Drawing, wire: wires.Wire_Ref, writer: anytype) @TypeOf(writer).Error!void {
+fn render_svg_wire(self: *Drawing, wire: wires.Wire_Ref, writer: *std.io.Writer) !void {
     const options = wire.options();
     const style = if (options.bits > 1) self.style.bus_style else self.style.wire_style;
 
@@ -439,7 +439,7 @@ fn render_svg_wire(self: *Drawing, wire: wires.Wire_Ref, writer: anytype) @TypeO
     }
 }
 
-fn render_svg_arrowhead_path(dx: f64, dy: f64, wire_style: Style.Wire_Style, writer: anytype) @TypeOf(writer).Error!void {
+fn render_svg_arrowhead_path(dx: f64, dy: f64, wire_style: Style.Wire_Style, writer: *std.io.Writer) !void {
     var tangent_x: f64 = if (dx > 0) 1 else if (dx < 0) -1 else 0;
     var tangent_y: f64 = if (dy > 0) 1 else if (dy < 0) -1 else 0;
 

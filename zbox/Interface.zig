@@ -62,7 +62,7 @@ pub fn add_missing_constraints(self: *Interface) void {
     self.span.add_missing_constraints(self.state, 0, self.state.drawing.style.default_interface_spacing * spaces_f64);
 }
 
-pub fn debug(self: *Interface, writer: anytype) !void {
+pub fn debug(self: *Interface, writer: *std.io.Writer) error{WriteFailed}!void {
     try writer.print("n: {}   spacing: {d}\n", .{ self.contents.items.len, self.spacing });
     try writer.writeAll("      span:  ");
     try self.span.debug(writer);

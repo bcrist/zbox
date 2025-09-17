@@ -1,11 +1,12 @@
 .{
-    .name = "ZBox",
-    .version = "1.1.0",
-    .minimum_zig_version = "0.12.0-dev.1849+bb0f7d55e",
+    .name = .zbox,
+    .version = "1.1.1",
+    .minimum_zig_version = "0.15.1",
+    .fingerprint = 0xd22e0ecc37bda7b5,
     .dependencies = .{
-        .@"Zig-DeepHashMap" = .{
-            .url = "https://github.com/bcrist/Zig-DeepHashMap/archive/7f5cc0cc3d36545a6f9bcf34c1b5cc4f06a3cd56.tar.gz",
-            .hash = "122081984f52f7ca15d7ced6e11266e79e7db5f162048c3e272e838585393d63cdb9",
+        .deep_hash_map = .{
+            .url = "git+https://github.com/bcrist/zig-deephashmap#ec22725ad1e4ea65488fe7c5bc1f2041d92bf87c",
+            .hash = "deep_hash_map-1.0.1-RLYshCUbAABnDZhPzE87HipEv7FG7ktpMSxLRxWvXuO7",
         },
     },
     .paths = .{
