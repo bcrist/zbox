@@ -60,8 +60,8 @@ pub fn y(self: Point_Ref) Y_Ref {
 }
 
 pub fn offset(self: Point_Ref, x_offset: f64, y_offset: f64) Point_Ref {
-    const xv = self.state.create_value(values.uninitialized);
-    const yv = self.state.create_value(values.uninitialized);
+    const xv = self.state.create_value(values.uninitialized, "(x)", null);
+    const yv = self.state.create_value(values.uninitialized, "(y)", null);
     self.state.constrain_offset(xv, self._x, x_offset, "Point_Ref x offset");
     self.state.constrain_offset(yv, self._y, y_offset, "Point_Ref y offset");
     return .{
@@ -72,27 +72,37 @@ pub fn offset(self: Point_Ref, x_offset: f64, y_offset: f64) Point_Ref {
 }
 
 pub fn label(self: Point_Ref, class: []const u8, alignment: Label.Alignment, baseline: Label.Baseline, text: []const u8) *Label {
-    const item = self.state.create_label(text, class, alignment, baseline, 0);
+    const item = self.state.create_label(text, .{
+        .class = class,
+        .alignment = alignment,
+        .baseline = baseline,
+        .angle = 0,
+    }, null);
     self.state.constrain_eql(&item._x, self._x, "label x");
     self.state.constrain_eql(&item._y, self._y, "label y");
     return item;
 }
 pub fn label_v(self: Point_Ref, class: []const u8, alignment: Label.Alignment, baseline: Label.Baseline, text: []const u8) *Label {
-    const item = self.state.create_label(text, class, alignment, baseline, -90);
+    const item = self.state.create_label(text, .{
+        .class = class,
+        .alignment = alignment,
+        .baseline = baseline,
+        .angle = -90,
+    }, null);
     self.state.constrain_eql(&item._x, self._x, "label x");
     self.state.constrain_eql(&item._y, self._y, "label y");
     return item;
 }
 
 pub fn wire_h(self: Point_Ref, options: wires.Options) *Wire_H {
-    const item = self.state.create_wire_h(options, null);
+    const item = self.state.create_wire_h(options, null, null);
     self.state.constrain_eql(&item._x.begin, self._x, "wire begin x");
     self.state.constrain_eql(&item._y, self._y, "wire y");
     return item;
 }
 
 pub fn wire_v(self: Point_Ref, options: wires.Options) *Wire_V {
-    const item = self.state.create_wire_v(options, null);
+    const item = self.state.create_wire_v(options, null, null);
     self.state.constrain_eql(&item._x, self._x, "wire x");
     self.state.constrain_eql(&item._y.begin, self._y, "wire begin y");
     return item;

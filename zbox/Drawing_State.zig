@@ -3,6 +3,7 @@ gpa: std.mem.Allocator,
 arena: std.heap.ArenaAllocator = std.heap.ArenaAllocator.init(std.heap.page_allocator),
 
 constraints: ShallowAutoHashMapUnmanaged(*const f64, Constraint) = .{},
+debug_value_names: ShallowAutoHashMapUnmanaged(*const anyopaque, Value_Name) = .{},
 
 labels: std.ArrayListUnmanaged(*Label) = .{},
 
@@ -24,6 +25,10 @@ loose_values: std.ArrayListUnmanaged(*f64) = .{},
 // note this includes the interfaces inside X/Y_Ref_Clusters as well
 interfaces: std.ArrayListUnmanaged(*Interface) = .{},
 
+const Value_Name = struct {
+    name: []const u8,
+    parent: ?*const anyopaque = null,
+};
 
 pub fn deinit(self: *Drawing_State) void {
     for (self.interfaces.items) |interface| {
@@ -41,23 +46,32 @@ pub fn deinit(self: *Drawing_State) void {
     self.boxes.deinit(self.gpa);
     self.labels.deinit(self.gpa);
     self.constraints.deinit(self.gpa);
+    self.debug_value_names.deinit(self.gpa);
 
     self.arena.deinit();
+}
+
+pub fn add_debug_value_name(self: *Drawing_State, ptr: *const anyopaque, name: []const u8, parent: ?*const anyopaque) void {
+    self.debug_value_names.put(self.gpa, ptr, .{
+        .name = name,
+        .parent = parent,
+    }) catch @panic("OOM");
 }
 
 pub fn print(self: *Drawing_State, comptime fmt: []const u8, args: anytype) []const u8 {
     return std.fmt.allocPrint(self.arena.allocator(), fmt, args) catch @panic("OOM");
 }
 
-pub fn create_value(self: *Drawing_State, initial_value: f64) *f64 {
+pub fn create_value(self: *Drawing_State, initial_value: f64, debug_name: []const u8, parent: ?*const anyopaque) *f64 {
     const arena = self.arena.allocator();
     const item = arena.create(f64) catch @panic("OOM");
     item.* = initial_value;
     self.loose_values.append(self.gpa, item) catch @panic("OOM");
+    self.add_debug_value_name(item, if (debug_name.len > 0) debug_name else "(f64)", parent);
     return item;
 }
 
-pub fn create_label(self: *Drawing_State, text: []const u8, options: Label.Options) *Label {
+pub fn create_label(self: *Drawing_State, text: []const u8, options: Label.Options, parent: ?*const anyopaque) *Label {
     const arena = self.arena.allocator();
     const item = arena.create(Label) catch @panic("OOM");
     item.* = .{
@@ -66,10 +80,11 @@ pub fn create_label(self: *Drawing_State, text: []const u8, options: Label.Optio
         .options = options,
     };
     self.labels.append(self.gpa, item) catch @panic("OOM");
+    item.set_debug_name(if (options.debug.len > 0) options.debug else text, parent);
     return item;
 }
 
-pub fn create_wire_h(self: *Drawing_State, options: wires.Options, previous: ?*Wire_V) *Wire_H {
+pub fn create_wire_h(self: *Drawing_State, options: wires.Options, previous: ?*Wire_V, parent: ?*const anyopaque) *Wire_H {
     const arena = self.arena.allocator();
     const item = arena.create(Wire_H) catch @panic("OOM");
     item.* = .{
@@ -80,11 +95,12 @@ pub fn create_wire_h(self: *Drawing_State, options: wires.Options, previous: ?*W
         w.next = item;
     } else {
         self.wires_h.append(self.gpa, item) catch @panic("OOM");
+        item.set_debug_name("Wire", parent);
     }
     return item;
 }
 
-pub fn create_wire_v(self: *Drawing_State, options: wires.Options, previous: ?*Wire_H) *Wire_V {
+pub fn create_wire_v(self: *Drawing_State, options: wires.Options, previous: ?*Wire_H, parent: ?*const anyopaque) *Wire_V {
     const arena = self.arena.allocator();
     const item = arena.create(Wire_V) catch @panic("OOM");
     item.* = .{
@@ -95,31 +111,34 @@ pub fn create_wire_v(self: *Drawing_State, options: wires.Options, previous: ?*W
         w.next = item;
     } else {
         self.wires_v.append(self.gpa, item) catch @panic("OOM");
+        item.set_debug_name("Wire", parent);
     }
     return item;
 }
 
-pub fn create_separator_h(self: *Drawing_State) *Separator_H {
+pub fn create_separator_h(self: *Drawing_State, parent: ?*const anyopaque) *Separator_H {
     const arena = self.arena.allocator();
     const item = arena.create(Separator_H) catch @panic("OOM");
     item.* = .{
         .state = self,
     };
     self.separators_h.append(self.gpa, item) catch @panic("OOM");
+    item.set_debug_name("Separator_H", parent);
     return item;
 }
 
-pub fn create_separator_v(self: *Drawing_State) *Separator_V {
+pub fn create_separator_v(self: *Drawing_State, parent: ?*const anyopaque) *Separator_V {
     const arena = self.arena.allocator();
     const item = arena.create(Separator_V) catch @panic("OOM");
     item.* = .{
         .state = self,
     };
     self.separators_v.append(self.gpa, item) catch @panic("OOM");
+    item.set_debug_name("Separator_V", parent);
     return item;
 }
 
-pub fn create_box(self: *Drawing_State, options: Box.Options) *Box {
+pub fn create_box(self: *Drawing_State, options: Box.Options, parent: ?*const anyopaque) *Box {
     const arena = self.arena.allocator();
     const item = arena.create(Box) catch @panic("OOM");
     item.* = .{
@@ -127,20 +146,23 @@ pub fn create_box(self: *Drawing_State, options: Box.Options) *Box {
         .options = options,
     };
     self.boxes.append(self.gpa, item) catch @panic("OOM");
+    const debug_name = if (options.debug.len > 0) options.debug else if (options.label.len > 0) options.label else "Box";
+    item.set_debug_name(debug_name, parent);
     return item;
 }
 
-pub fn create_interface(self: *Drawing_State) *Interface {
+pub fn create_interface(self: *Drawing_State, debug_name: []const u8, parent: ?*const anyopaque) *Interface {
     const arena = self.arena.allocator();
     const item = arena.create(Interface) catch @panic("OOM");
     item.* = .{
         .state = self,
     };
     self.interfaces.append(self.gpa, item) catch @panic("OOM");
+    item.set_debug_name(if (debug_name.len > 0) debug_name else "Interface", parent);
     return item;
 }
 
-pub fn create_x_ref_cluster(self: *Drawing_State) *X_Ref_Cluster {
+pub fn create_x_ref_cluster(self: *Drawing_State, parent: ?*const anyopaque) *X_Ref_Cluster {
     const arena = self.arena.allocator();
     const item = arena.create(X_Ref_Cluster) catch @panic("OOM");
     item.* = .{ .interface = .{
@@ -148,10 +170,11 @@ pub fn create_x_ref_cluster(self: *Drawing_State) *X_Ref_Cluster {
     }};
     self.x_ref_clusters.append(self.gpa, item) catch @panic("OOM");
     self.interfaces.append(self.gpa, &item.interface) catch @panic("OOM");
+    item.set_debug_name("X_Ref_Cluster", parent);
     return item;
 }
 
-pub fn create_y_ref_cluster(self: *Drawing_State) *Y_Ref_Cluster {
+pub fn create_y_ref_cluster(self: *Drawing_State, parent: ?*const anyopaque) *Y_Ref_Cluster {
     const arena = self.arena.allocator();
     const item = arena.create(Y_Ref_Cluster) catch @panic("OOM");
     item.* = .{ .interface = .{
@@ -159,6 +182,7 @@ pub fn create_y_ref_cluster(self: *Drawing_State) *Y_Ref_Cluster {
     }};
     self.y_ref_clusters.append(self.gpa, item) catch @panic("OOM");
     self.interfaces.append(self.gpa, &item.interface) catch @panic("OOM");
+    item.set_debug_name("Y_Ref_Cluster", parent);
     return item;
 }
 
@@ -217,7 +241,7 @@ pub fn resolve_constraints(self: *Drawing_State) !void {
     }
     std.debug.assert(i == constraints.len);
 
-    try kahn.sort(a, constraints);
+    try kahn.sort(a, self, constraints);
 
     for (constraints) |constraint| {
         std.debug.assert(values.is_constrained(constraint.dest.*));
@@ -278,27 +302,27 @@ pub fn remove_constraint(self: *Drawing_State, val: *f64) void {
     _ = self.constraints.remove(val);
 }
 
-pub fn debug(self: *Drawing_State, writer: *std.io.Writer) error{WriteFailed}!void {
+pub fn format(self: *Drawing_State, writer: *std.io.Writer) error{WriteFailed}!void {
     for (self.x_ref_clusters.items) |c| {
-        try c.debug(writer);
+        try c.format(writer);
     }
     for (self.y_ref_clusters.items) |c| {
-        try c.debug(writer);
+        try c.format(writer);
     }
 
      for (self.wires_h.items) |w| {
-        try w.debug(writer);
+        try w.format(writer);
     }
     for (self.wires_v.items) |w| {
-        try w.debug(writer);
+        try w.format(writer);
     }
 
     for (self.boxes.items) |b| {
-        try b.debug(writer);
+        try b.format(writer);
     }
 
     for (self.labels.items) |l| {
-        try l.debug(writer);
+        try l.format(writer);
     }
 }
 

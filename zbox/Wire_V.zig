@@ -1,9 +1,18 @@
 state: *Drawing_State,
 options: wires.Options,
-next: ?*Wire_H = null,
 bit_mark_location: ?f64 = null,
+next: ?*Wire_H = null,
+_label: ?*Label = null,
 _x: f64 = values.uninitialized,
 _y: Span = .{},
+
+pub fn ref(self: *Wire_V) wires.Wire_Ref {
+    return .{ .V = self };
+}
+
+pub fn iterator(self: *Wire_V) wires.Iterator {
+    return .{ .wire = self.ref() };
+}
 
 pub fn x(self: *Wire_V) X_Ref {
     return .{
@@ -56,14 +65,35 @@ pub fn bit_mark_at(self: *Wire_V, f: f64) *Wire_V {
     return self;
 }
 
+pub fn change_options(self: *Wire_V, options: wires.Options) *Wire_V {
+    self.options = options;
+    return self;
+}
+
+pub fn change_class(self: *Wire_V, new_class: []const u8) *Wire_V {
+    self.options.class = new_class;
+    return self;
+}
+
+pub fn change_bits(self: *Wire_V, new_bits: usize) *Wire_V {
+    self.options.bits = new_bits;
+    return self;
+}
+
 pub fn label(self: *Wire_V, text: []const u8, options: Label.Options) *Wire_V {
+    if (text.len == 0) {
+        self._label = null;
+        return self;
+    }
+
     const style = if (self.options.bits > 1) self.state.drawing.style.bus_style else self.state.drawing.style.wire_style;
     var options_mut = options;
     options_mut.angle = -90;
     options_mut._class1 = self.options.class;
     options_mut._class2 = if (self.options.bits > 1) "wire-label bus" else "wire-label";
 
-    const item = self.state.create_label(text, options_mut);
+    const item = self.state.create_label(text, options_mut, self);
+    self._label = item;
 
     if (options_mut.baseline == .middle) {
         self.state.constrain_eql(&item._x, &self._x, "wire label x");
@@ -86,9 +116,13 @@ pub fn label(self: *Wire_V, text: []const u8, options: Label.Options) *Wire_V {
     return self;
 }
 
+pub fn fmt_label(self: *Wire_V, comptime fmt: []const u8, args: anytype, options: Label.Options) *Wire_V {
+    return self.label(self.state.print(fmt, args), options);
+}
+
 pub fn turn(self: *Wire_V) *Wire_H {
     if (self.next) |next| return next;
-    return self.state.create_wire_h(self.options, self);
+    return self.state.create_wire_h(self.options, self, null);
 }
 
 pub fn turn_at(self: *Wire_V, y: Y_Ref) *Wire_H {
@@ -118,6 +152,37 @@ pub fn continue_at(self: *Wire_V, y: Y_Ref) *Wire_V {
     const h_wire = self.turn_at(y);
     self.state.constrain_eql(&h_wire._x.end, &self._x, "continue_at x");
     return h_wire.turn();
+}
+
+pub fn continue_at_offset(self: *Wire_V, y: Y_Ref, offset: f64) *Wire_H {
+    const h_wire = self.turn_at_offset(y, offset);
+    self.state.constrain_eql(&h_wire._x.end, &self._x, "continue_at x");
+    return h_wire.turn();
+}
+
+pub fn small_box(self: *Wire_V, text: []const u8, direction: Direction) *Wire_V {
+    const box = self.state.create_box(.{ .shape = .small, .label = text }, self);
+    switch (direction) {
+        .up => _ = box.bottom_center().attach_to(self.endpoint()),
+        .down => _ = box.top_center().attach_to(self.endpoint()),
+    }
+
+    var new_wire_options = self.options;
+    new_wire_options.dir = .init(.none, self.options.dir.end());
+    self.options.dir = .init(self.options.dir.begin(), .none);
+
+    return switch (direction) {
+        .up => box.top_side("").wire_v(new_wire_options),
+        .down => box.bottom_side("").wire_v(new_wire_options),
+    };
+}
+
+pub fn small_box_at(self: *Wire_V, y: Y_Ref, text: []const u8, direction: Direction) *Wire_V {
+    return self.end_at(y).small_box(text, direction);
+}
+
+pub fn small_box_at_offset(self: *Wire_V, y: Y_Ref, offset: f64, text: []const u8, direction: Direction) *Wire_V {
+    return self.end_at_offset(y, offset).small_box(text, direction);
 }
 
 pub fn end_at(self: *Wire_V, y: Y_Ref) *Wire_V {
@@ -150,7 +215,12 @@ pub fn end_at_mutable_point(self: *Wire_V, end: Point_Ref) *Wire_V {
 }
 
 pub fn add_missing_constraints(self: *Wire_V) void {
+    if (self._label) |l| {
+        l.set_debug_name("_label", self);
+    }
     if (self.next) |next| {
+        next.set_debug_name("", self);
+
         if (self._y.is_end_constrained()) {
             self.state.constrain_eql(&next._y, &self._y.end, "wire segment connection");
         } else if (!values.is_uninitialized(next._y)) {
@@ -176,18 +246,40 @@ pub fn add_missing_constraints(self: *Wire_V) void {
     self._y.add_missing_constraints(self.state, 0, style.default_length);
 }
 
-pub fn debug(self: *Wire_V, writer: *std.io.Writer) error{WriteFailed}!void {
+/// N.B. this only works once constraints have been evaluated
+pub fn contains_point(self: *Wire_V, px: f64, py: f64) bool {
+    if (std.math.approxEqAbs(f64, self._x, px, 0.5)) {
+        if (self._y.min - 0.5 <= py and self._y.max + 0.5 >= py) return true;
+    }
+    if (self.next) |next| {
+        return next.contains_point(px, py);
+    }
+    return false;
+}
+
+pub fn format(self: *Wire_V, writer: *std.io.Writer) error{WriteFailed}!void {
     try writer.print("Wire_V: {s}\n   x: {d}\n   y: ", .{
         self.options.class,
         self._x,
     });
-    try self._y.debug(writer);
+    try self._y.format(writer);
 
     if (self.next) |next| {
         try writer.writeAll(" -> ");
-        try next.debug(writer);
+        try next.format(writer);
     }
 }
+
+pub fn set_debug_name(self: *Wire_V, debug_name: []const u8, parent: ?*const anyopaque) void {
+    self.state.add_debug_value_name(self, debug_name, parent);
+    self.state.add_debug_value_name(&self._x, "_x", self);
+    self._y.set_debug_name(self.state, "_y", self);
+}
+
+const Direction = enum {
+    up,
+    down,
+};
 
 const Wire_V = @This();
 const Wire_H = @import("Wire_H.zig");

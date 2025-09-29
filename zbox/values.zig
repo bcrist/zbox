@@ -13,12 +13,4 @@ pub fn is_constrained(value: f64) bool {
     return uvalue == ucheck;
 }
 
-pub fn ptr_to_slice(val: *const *const f64) []const *const f64 {
-    // This can be removed when https://github.com/ziglang/zig/issues/16075 is implemented
-    var slice: []const *const f64 = undefined;
-    slice.ptr = @ptrCast(val);
-    slice.len = 1;
-    return slice;
-}
-
 const std = @import("std");

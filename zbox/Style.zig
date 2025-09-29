@@ -1,6 +1,8 @@
 base_css: []const u8 = @embedFile("default.css"),
 extra_css: []const u8 = "",
 
+global_scale: f64 = 1.25,
+
 drawing_padding_x: f64 = 25,
 drawing_padding_y: f64 = 25,
 
@@ -22,6 +24,7 @@ wire_style: Wire_Style = .{
     .arrow_length = 10,
     .arrow_width = 5,
     .junction_radius = 4,
+    .inverter_radius = 6,
     .bit_mark_length = 6,
     .bit_mark_label_offset_x = 5,
     .bit_mark_label_offset_xy = 1,
@@ -36,6 +39,7 @@ bus_style: Wire_Style = .{
     .arrow_length = 12,
     .arrow_width = 8,
     .junction_radius = 6,
+    .inverter_radius = 6,
     .bit_mark_length = 10,
     .bit_mark_label_offset_x = 6,
     .bit_mark_label_offset_xy = 1.5,
@@ -51,6 +55,7 @@ pub const Wire_Style = struct {
     arrow_length: f64,
     arrow_width: f64,
     junction_radius: f64,
+    inverter_radius: f64,
     bit_mark_length: f64,
     bit_mark_label_offset_x: f64,
     bit_mark_label_offset_xy: f64,

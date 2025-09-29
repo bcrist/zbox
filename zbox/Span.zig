@@ -1,3 +1,5 @@
+_pad: f64 = 0, // hopefully this ensures &begin != &self (zig doesn't guarantee this, but in practice it seems to always work when all fields have the same alignment)
+
 // Exactly two of the following should be initialized to fully constrain the span:
 begin: f64 = values.uninitialized,
 end: f64 = values.uninitialized,
@@ -83,12 +85,24 @@ fn default_mid(self: *Span, state: *Drawing_State) void {
     state.constrain_midpoint(&self.mid, &self.begin, &self.end, "default span mid");
 }
 
-pub fn debug(self: *Span, writer: *std.io.Writer) error{WriteFailed}!void {
+pub fn format(self: *Span, writer: *std.io.Writer) error{WriteFailed}!void {
     try writer.print("begin: {d}   mid: {d}   end: {d}   delta: {d}   min: {d}   max: {d}   len: {d}\n", .{
         self.begin, self.mid, self.end, self.delta,
         self.min, self.max, self.len,
     });
 }
+
+pub fn set_debug_name(self: *Span, state: *Drawing_State, debug_name: []const u8, parent: ?*const anyopaque) void {
+    state.add_debug_value_name(self, debug_name, parent);
+    state.add_debug_value_name(&self.begin, "begin", self);
+    state.add_debug_value_name(&self.end, "end", self);
+    state.add_debug_value_name(&self.mid, "mid", self);
+    state.add_debug_value_name(&self.delta, "delta", self);
+    state.add_debug_value_name(&self.min, "min", self);
+    state.add_debug_value_name(&self.max, "max", self);
+    state.add_debug_value_name(&self.len, "len", self);
+}
+
 
 const Span = @This();
 const Drawing_State = @import("Drawing_State.zig");

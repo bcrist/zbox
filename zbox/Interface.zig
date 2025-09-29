@@ -6,7 +6,7 @@ spacing: f64 = values.uninitialized,
 span: Span = .{},
 
 pub fn push(self: *Interface) *f64 {
-    const item = self.state.create_value(values.uninitialized);
+    const item = self.state.create_value(values.uninitialized, "", null);
     self.contents.append(self.state.gpa, item) catch @panic("OOM");
     return item;
 }
@@ -23,7 +23,9 @@ pub fn flip(self: *Interface) void {
 
 pub fn add_missing_constraints(self: *Interface) void {
     var spaces: usize = 0;
-    for (self.contents.items) |item| {
+    for (0.., self.contents.items) |i, item| {
+        self.state.add_debug_value_name(item, self.state.print("[{d}]", .{ i }), self);
+
         if (values.is_uninitialized(item.*)) {
             spaces += 1;
         }
@@ -62,10 +64,16 @@ pub fn add_missing_constraints(self: *Interface) void {
     self.span.add_missing_constraints(self.state, 0, self.state.drawing.style.default_interface_spacing * spaces_f64);
 }
 
-pub fn debug(self: *Interface, writer: *std.io.Writer) error{WriteFailed}!void {
+pub fn format(self: *Interface, writer: *std.io.Writer) error{WriteFailed}!void {
     try writer.print("n: {}   spacing: {d}\n", .{ self.contents.items.len, self.spacing });
     try writer.writeAll("      span:  ");
-    try self.span.debug(writer);
+    try self.span.format(writer);
+}
+
+pub fn set_debug_name(self: *Interface, debug_name: []const u8, parent: ?*const anyopaque) void {
+    self.state.add_debug_value_name(self, debug_name, parent);
+    self.state.add_debug_value_name(&self.spacing, "spacing", self);
+    self.span.set_debug_name(self.state, "span", self);
 }
 
 const Interface = @This();

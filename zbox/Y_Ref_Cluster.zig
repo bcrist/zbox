@@ -35,9 +35,14 @@ pub fn push(self: *Y_Ref_Cluster) Y_Ref {
     };
 }
 
-pub fn debug(self: *Y_Ref_Cluster, writer: *std.io.Writer) error{WriteFailed}!void {
+pub fn format(self: *Y_Ref_Cluster, writer: *std.io.Writer) error{WriteFailed}!void {
     try writer.writeAll("Y_Ref_Cluster: ");
-    try self.interface.debug(writer);
+    try self.interface.format(writer);
+}
+
+pub fn set_debug_name(self: *Y_Ref_Cluster, debug_name: []const u8, parent: ?*const anyopaque) void {
+    self.interface.state.add_debug_value_name(self, debug_name, parent);
+    self.interface.set_debug_name("interface", self);
 }
 
 const Y_Ref_Cluster = @This();

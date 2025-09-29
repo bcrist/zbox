@@ -32,8 +32,11 @@ test "example" {
     const small = d.box(.{ .shape = .small, .label = "^1" });
     _ = small.top_left().attach_to_offset(b.top_right(), 300, 0);
 
-    const mux = d.box(.{ .shape = .mux });
+    const mux = d.box(.{ .shape = .alu });
     _ = mux.top_center().attach_to_offset(small.bottom_center(), 0, 50);
+
+    _ = mux.left_side_upper("A").wire_h(.{}).length(-30);
+    _ = mux.left_side_lower("B").wire_h(.{}).length(-30);
 
     const demux = d.box(.{ .shape = .demux });
     _ = demux.middle_left().attach_to_offset(mux.middle_right(), 50, 0);
@@ -109,6 +112,21 @@ test "example" {
     _ = b3.bottom_side("123").wire_v(.{ .dir = .reverse }).end_at(bus.y());
 
 
+    const bowtie = d.box(.{ .shape = .bowtie });
+    _ = bowtie.middle_center().anchor_at(400, 600);
+
+    const and_gate = d.box(.{ .shape = .@"and" });
+    _ = and_gate.middle_center().anchor_at(200, 600);
+    _ = and_gate.left_side("").wire_h(.{}).length(-30);
+    _ = and_gate.left_side("").wire_h(.{}).length(-30);
+    // _ = and_gate.left_side("").wire_h(.{}).length(-30);
+    // _ = and_gate.left_side("").wire_h(.{}).length(-30);
+
+    const xor_gate = d.box(.{ .shape = .@"xor" });
+    _ = xor_gate.middle_center().anchor_at(100, 600);
+    _ = xor_gate.left_side("").wire_h(.{}).length(-30);
+    _ = xor_gate.left_side("").wire_h(.{}).length(-30);
+
     var f = try std.fs.cwd().createFile("test.svg", .{});
     defer f.close();
     var buf: [4096]u8 = undefined;
@@ -116,9 +134,12 @@ test "example" {
     try d.render_svg(&w.interface);
     try w.interface.flush();
 
-    var stderr = std.fs.File.stderr().writer(&buf);
-    try d.state.debug(&stderr.interface);
-    try stderr.interface.flush();
+    // var stderr = std.fs.File.stderr().writer(&buf);
+    //const debug = &stderr.interface;
+    var writer = std.io.Writer.Discarding.init(&buf);
+    const debug = &writer.writer;
+    try d.state.debug(debug);
+    try debug.flush();
 }
 
 const zbox = @import("zbox");

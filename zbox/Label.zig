@@ -11,6 +11,8 @@ pub const Options = struct {
     alignment: Alignment = .left,
     baseline: Baseline = .normal,
     angle: f64 = 0,
+    size: f64 = 0, // 0 = default
+    debug: []const u8 = "",
 };
 
 pub const Alignment = enum {
@@ -42,7 +44,7 @@ pub fn add_missing_constraints(self: *Label) void {
     }
 }
 
-pub fn debug(self: *Label, writer: *std.io.Writer) error{WriteFailed}!void {
+pub fn format(self: *Label, writer: *std.io.Writer) error{WriteFailed}!void {
     try writer.print("Label: {s} {t} {t} {s}\n", .{
         self.options.class,
         self.options.alignment,
@@ -51,6 +53,12 @@ pub fn debug(self: *Label, writer: *std.io.Writer) error{WriteFailed}!void {
     });
     try writer.print("   x: {d}\n", .{ self._x });
     try writer.print("   y: {d}\n", .{ self._y });
+}
+
+pub fn set_debug_name(self: *Label, debug_name: []const u8, parent: ?*const anyopaque) void {
+    self.state.add_debug_value_name(self, debug_name, parent);
+    self.state.add_debug_value_name(&self._x, "_x", self);
+    self.state.add_debug_value_name(&self._y, "_y", self);
 }
 
 const Label = @This();

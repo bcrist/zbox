@@ -29,6 +29,11 @@ pub fn label(self: *Separator_H, x: X_Ref, text: []const u8, options: Label.Opti
     return self;
 }
 
+pub fn set_debug_name(self: *Separator_H, debug_name: []const u8, parent: ?*const anyopaque) void {
+    self.state.add_debug_value_name(self, debug_name, parent);
+    self.state.add_debug_value_name(&self._y, "_y", self);
+}
+
 const Separator_H = @This();
 const X_Ref = @import("X_Ref.zig");
 const Y_Ref = @import("Y_Ref.zig");

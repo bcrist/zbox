@@ -2,6 +2,36 @@ dest: *f64,
 op: Op,
 debug: []const u8,
 
+const Formattable = struct {
+    constraint: Constraint,
+    state: *const Drawing_State,
+
+    pub fn format(self: Formattable, w: *std.io.Writer) !void {
+        try debug_ptr(self.state, self.constraint.dest, w);
+        try w.writeAll(": ");
+        try self.constraint.op.debug(self.state, w);
+    }
+};
+
+pub fn formatter(self: Constraint, state: *const Drawing_State) std.fmt.Alt(Formattable, Formattable.format) {
+    return .{ .data = .{
+        .constraint = self,
+        .state = state,
+    }};
+}
+
+fn debug_ptr(state: *const Drawing_State, ptr: *const anyopaque, w: *std.io.Writer) !void {
+    if (state.debug_value_names.get(ptr)) |name| {
+        if (name.parent) |parent| {
+            try debug_ptr(state, parent, w);
+            try w.writeByte('.');
+        }
+        try w.writeAll(name.name);
+    } else {
+        try w.print("#{X:0>16}", .{ @intFromPtr(ptr) });
+    }
+}
+
 pub const Op = union(enum) {
     copy: *const f64,
 
@@ -18,11 +48,11 @@ pub const Op = union(enum) {
     min2: [2]*const f64,
     max2: [2]*const f64,
 
-    sum: []*const f64,
-    product: []*const f64,
-    mean: []*const f64,
-    min: []*const f64,
-    max: []*const f64,
+    sum: []const *const f64,
+    product: []const *const f64,
+    mean: []const *const f64,
+    min: []const *const f64,
+    max: []const *const f64,
 
     pub fn clone(self: Op, allocator: std.mem.Allocator) Op {
         switch (self) {
@@ -40,10 +70,37 @@ pub const Op = union(enum) {
         }
     }
 
+    pub fn debug(self: Op, state: *const Drawing_State, w: *std.io.Writer) !void {
+        try w.writeAll(@tagName(self));
+        try w.writeAll(": ");
+        switch (self) {
+            .copy => |other| try debug_ptr(state, other, w),
+            .offset_and_scale, .scale_and_offset => |info| try debug_ptr(state, info.src, w),
+            .scaled_difference, .scaled_offset, .lerp, => |info| {
+                try w.writeAll("\n                        [0]: ");
+                try debug_ptr(state, info.operands[0], w);
+                try w.writeAll("\n                        [1]: ");
+                try debug_ptr(state, info.operands[1], w);
+            },
+            .difference, .midpoint, .sum2, .min2, .max2 => |ptrs| {
+                try w.writeAll("\n                        [0]: ");
+                try debug_ptr(state, ptrs[0], w);
+                try w.writeAll("\n                        [1]: ");
+                try debug_ptr(state, ptrs[1], w);
+            },
+            .sum, .product, .mean, .min, .max => |ptrs| {
+                for (0.., ptrs) |i, ptr| {
+                    try w.print("\n                        [{d}]: ", .{ i });
+                    try debug_ptr(state, ptr, w);
+                }
+            },
+        }
+    }
+
     pub fn deps(self: *const Op) []const *const f64 {
         return switch (self.*) {
-            .copy => |*ptr| values.ptr_to_slice(ptr),
-            .offset_and_scale, .scale_and_offset => |*info| values.ptr_to_slice(&info.src),
+            .copy => |*ptr| ptr[0..1],
+            .offset_and_scale, .scale_and_offset => |*info| (&info.src)[0..1],
             .scaled_difference, .scaled_offset, .lerp => |*info| &info.operands,
             .difference, .midpoint, .sum2, .min2, .max2 => |*operands| operands,
             .sum, .product, .mean, .min, .max => |ptrs| ptrs,
@@ -190,5 +247,8 @@ pub const Two_Operand_Coefficient = struct {
     k: f64,
 };
 
+const Constraint = @This();
+
+const Drawing_State = @import("Drawing_State.zig");
 const values = @import("values.zig");
 const std = @import("std");

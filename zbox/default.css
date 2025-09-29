@@ -1,13 +1,13 @@
 svg {
-    background: #394150;
+    background: #1D2021;
 }
 text {
     display: block;
     white-space-collapse: preserve;
     text-wrap: nowrap;
-    font-size: 14px;
+    font-size: 12px;
     font-family: Iosevka Custom, Iosevka, Inconsolata, Consolas, monospace;
-    fill: #E5E9F0;
+    fill: #EBDBB2;
 }
 text._nl { dominant-baseline: auto; text-anchor: start; }
 text._nc { dominant-baseline: auto; text-anchor: middle; }
@@ -19,53 +19,124 @@ text._hl { dominant-baseline: hanging; text-anchor: start; }
 text._hc { dominant-baseline: hanging; text-anchor: middle; }
 text._hr { dominant-baseline: hanging; text-anchor: end; }
 .box-label.main, .box-label.top, .box-label.bottom {
-    font-size: 25px;
+    font-size: 16px;
 }
 .box-label.interface.interface, text.small.small.small {
-    font-size: 14px;
+    font-size: 12px;
+}
+.box-label.interface.interface.mux {
+    font-size: 8px;
+}
+.box-label.main.alu {
+    font-size: 22px;
 }
 text.bitmark-label {
     stroke: none;
-    fill: #E5E9F0;
+    fill: #789D6A;
     font-size: 9px;
 }
 .sep {
     stroke-width: 3;
-    stroke: #262c38;
+    stroke: #363e4e;
 }
 .sep-label {
-    fill: #12161d;
+    fill: #54637a;
     font-size: 18px;
 }
 .box {
     stroke-width: 2;
-    stroke: #ECEFF4;
-    fill: #4C566A;
+    stroke: #83A598;
+    fill: #32302F;
     rx: 5;
     ry: 5;
 }
+.box.reg {
+    stroke: #eca372;
+}
+.wire_group text {
+    fill: #789D6A;
+}
+.wire_group text.control {
+    fill: #198fdf;
+}
+.wire_group text.reg {
+    fill: #e48546;
+}
+.wire_group:hover text {
+    fill: #FBF1C7;
+}
+.wire_outline {
+    stroke-width: 12;
+    stroke: transparent;
+    stroke-linecap: butt;
+    stroke-linejoin: round;
+    fill: none;
+}
 .wire {
-    stroke-width: 2;
-    stroke: #A3BE8C;
+    stroke-width: 1;
+    stroke: #789D6A;
     stroke-linecap: round;
     stroke-linejoin: round;
     fill: none;
 }
+.wire.control {
+    stroke: #198fdf;
+}
+.wire.reg {
+    stroke: #e48546;
+}
+.wire_group:hover .wire {
+    stroke: #FBF1C7;
+}
 .wire.junction {
-    fill: #A3BE8C;
+    fill: #789D6A;
+    stroke: none;
+}
+.wire.junction.control {
+    fill: #198fdf;
+}
+.wire.junction.reg {
+    fill: #e48546;
+}
+.wire_group:hover .wire.junction {
+    fill: #FBF1C7;
     stroke: none;
 }
 .wire.bus {
-    stroke-width: 4;
-    stroke: #5E81AC;
+    stroke-width: 1;
+    stroke: #789D6A;
     stroke-linecap: round;
     stroke-linejoin: round;
     fill: none;
 }
+.wire.bus.control {
+    stroke: #198fdf;
+}
+.wire.bus.reg {
+    stroke: #e48546;
+}
+.wire_group:hover .wire.bus {
+    stroke: #FBF1C7;
+}
 .wire.bus.junction {
-    fill: #5E81AC;
+    fill: #789D6A;
     stroke: none;
 }
-.wire.wire.wire.bitmark {
+.wire.bus.junction.control {
+    fill: #198fdf;
+}
+.wire.bus.junction.reg {
+    fill: #e48546;
+}
+.wire_group:hover .wire.bus.junction {
+    fill: #FBF1C7;
+    stroke: none;
+}
+.wire.wire.wire.bitmark, .wire_group:hover .wire.wire.wire.bitmark {
     stroke-width: 1;
+}
+.wire.inverter.inverter, .wire.bus.inverter.inverter {
+    stroke-width: 2;
+    stroke: #83A598;
+    fill: #32302F;
 }
