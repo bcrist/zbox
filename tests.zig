@@ -138,7 +138,7 @@ test "example" {
     //const debug = &stderr.interface;
     var writer = std.io.Writer.Discarding.init(&buf);
     const debug = &writer.writer;
-    try d.state.debug(debug);
+    try d.state.format(debug);
     try debug.flush();
 }
 

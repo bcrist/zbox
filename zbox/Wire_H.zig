@@ -230,6 +230,12 @@ pub fn add_missing_constraints(self: *Wire_H) void {
             self.state.constrain_eql(&self._x.end, &next._x, "wire segment connection");
         } else {
             self.state.constrain_eql(&next._x, &self._x.end, "wire segment connection");
+
+            if (next.next) |next_h| {
+                if (values.is_uninitialized(next_h._x.begin) and !values.is_uninitialized(next_h._x.end)) {
+                    self.state.constrain_midpoint(&self._x.end, &self._x.begin, &next_h._x.end, "default wire turn between");
+                }
+            }
         }
 
         if (values.is_uninitialized(self._y) and next._y.is_begin_constrained()) {
