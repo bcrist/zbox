@@ -127,16 +127,16 @@ test "example" {
     _ = xor_gate.left_side("").wire_h(.{}).length(-30);
     _ = xor_gate.left_side("").wire_h(.{}).length(-30);
 
-    var f = try std.fs.cwd().createFile("test.svg", .{});
-    defer f.close();
+    var f = try std.Io.Dir.cwd().createFile(std.testing.io, "test.svg", .{});
+    defer f.close(std.testing.io);
     var buf: [4096]u8 = undefined;
-    var w = f.writer(&buf);
+    var w = f.writer(std.testing.io, &buf);
     try d.render_svg(&w.interface);
     try w.interface.flush();
 
     // var stderr = std.fs.File.stderr().writer(&buf);
     //const debug = &stderr.interface;
-    var writer = std.io.Writer.Discarding.init(&buf);
+    var writer = std.Io.Writer.Discarding.init(&buf);
     const debug = &writer.writer;
     try d.state.format(debug);
     try debug.flush();

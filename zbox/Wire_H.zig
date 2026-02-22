@@ -266,7 +266,7 @@ pub fn contains_point(self: *Wire_H, px: f64, py: f64) bool {
     return false;
 }
 
-pub fn format(self: *Wire_H, writer: *std.io.Writer) error{WriteFailed}!void {
+pub fn format(self: *Wire_H, writer: *std.Io.Writer) error{WriteFailed}!void {
     try writer.print("Wire_H: {s}\n   x: ", .{
         self.options.class,
     });

@@ -35,7 +35,7 @@ pub fn push(self: *Y_Ref_Cluster) Y_Ref {
     };
 }
 
-pub fn format(self: *Y_Ref_Cluster, writer: *std.io.Writer) error{WriteFailed}!void {
+pub fn format(self: *Y_Ref_Cluster, writer: *std.Io.Writer) error{WriteFailed}!void {
     try writer.writeAll("Y_Ref_Cluster: ");
     try self.interface.format(writer);
 }

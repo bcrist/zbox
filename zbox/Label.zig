@@ -44,7 +44,7 @@ pub fn add_missing_constraints(self: *Label) void {
     }
 }
 
-pub fn format(self: *Label, writer: *std.io.Writer) error{WriteFailed}!void {
+pub fn format(self: *Label, writer: *std.Io.Writer) error{WriteFailed}!void {
     try writer.print("Label: {s} {t} {t} {s}\n", .{
         self.options.class,
         self.options.alignment,

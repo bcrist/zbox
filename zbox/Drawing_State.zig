@@ -302,7 +302,7 @@ pub fn remove_constraint(self: *Drawing_State, val: *f64) void {
     _ = self.constraints.remove(val);
 }
 
-pub fn format(self: *Drawing_State, writer: *std.io.Writer) error{WriteFailed}!void {
+pub fn format(self: *Drawing_State, writer: *std.Io.Writer) error{WriteFailed}!void {
     for (self.x_ref_clusters.items) |c| {
         try c.format(writer);
     }

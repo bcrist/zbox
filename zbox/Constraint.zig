@@ -6,7 +6,7 @@ const Formattable = struct {
     constraint: Constraint,
     state: *const Drawing_State,
 
-    pub fn format(self: Formattable, w: *std.io.Writer) !void {
+    pub fn format(self: Formattable, w: *std.Io.Writer) !void {
         try debug_ptr(self.state, self.constraint.dest, w);
         try w.writeAll(": ");
         try self.constraint.op.debug(self.state, w);
@@ -20,7 +20,7 @@ pub fn formatter(self: Constraint, state: *const Drawing_State) std.fmt.Alt(Form
     }};
 }
 
-fn debug_ptr(state: *const Drawing_State, ptr: *const anyopaque, w: *std.io.Writer) !void {
+fn debug_ptr(state: *const Drawing_State, ptr: *const anyopaque, w: *std.Io.Writer) !void {
     if (state.debug_value_names.get(ptr)) |name| {
         if (name.parent) |parent| {
             try debug_ptr(state, parent, w);
@@ -70,7 +70,7 @@ pub const Op = union(enum) {
         }
     }
 
-    pub fn debug(self: Op, state: *const Drawing_State, w: *std.io.Writer) !void {
+    pub fn debug(self: Op, state: *const Drawing_State, w: *std.Io.Writer) !void {
         try w.writeAll(@tagName(self));
         try w.writeAll(": ");
         switch (self) {

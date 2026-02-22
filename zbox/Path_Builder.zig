@@ -1,11 +1,11 @@
-writer: *std.io.Writer,
+writer: *std.Io.Writer,
 cursor: ?struct {
     last_command: u8,
     x: f64,
     y: f64,
 },
 
-pub fn init(w: *std.io.Writer) !Path_Builder {
+pub fn init(w: *std.Io.Writer) !Path_Builder {
     try w.writeAll("<path d=\"");
     return .{
         .writer = w,

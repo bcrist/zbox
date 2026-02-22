@@ -142,18 +142,18 @@ pub fn between_y(self: *Drawing, a: Y_Ref, b: Y_Ref, f: f64) Y_Ref {
     };
 }
 
-pub fn render_svg_to_file(self: *Drawing, dir: std.fs.Dir, path: []const u8) !void {
-    var f = try dir.createFile(path, .{});
+pub fn render_svg_to_file(self: *Drawing, io: std.Io, dir: std.Io.Dir, path: []const u8) !void {
+    var f = try dir.createFile(io, path, .{});
     defer f.close();
 
     var buf: [4096]u8 = undefined;
-    var w = f.writer(&buf);
+    var w = f.writer(io, &buf);
 
     try self.render_svg(&w.interface);
     try w.interface.flush();
 }
 
-pub fn render_svg(self: *Drawing, writer: *std.io.Writer) !void {
+pub fn render_svg(self: *Drawing, writer: *std.Io.Writer) !void {
     self.state.add_missing_constraints();
     try self.state.resolve_constraints();
 
@@ -253,7 +253,7 @@ pub fn render_svg(self: *Drawing, writer: *std.io.Writer) !void {
     try writer.writeAll("</svg>");
 }
 
-fn render_svg_box(self: *Drawing, b: *Box, writer: *std.io.Writer) !void {
+fn render_svg_box(self: *Drawing, b: *Box, writer: *std.Io.Writer) !void {
     switch (b.options.shape) {
         .mux, .alu => {
             const dy = b._x.len / 4;
@@ -405,7 +405,7 @@ fn render_svg_box(self: *Drawing, b: *Box, writer: *std.io.Writer) !void {
     }
 }
 
-fn render_svg_label(lx: f64, ly: f64, text: []const u8, options: Label.Options, writer: *std.io.Writer) !void {
+fn render_svg_label(lx: f64, ly: f64, text: []const u8, options: Label.Options, writer: *std.Io.Writer) !void {
     try writer.print(
         \\<text x="{d}" y="{d}" class="label _{s}{s}
     , .{
@@ -457,7 +457,7 @@ fn render_svg_label(lx: f64, ly: f64, text: []const u8, options: Label.Options, 
     try writer.writeAll("</text>\n");
 }
 
-fn render_svg_wire(self: *Drawing, wire: wires.Wire_Ref, writer: *std.io.Writer) !void {
+fn render_svg_wire(self: *Drawing, wire: wires.Wire_Ref, writer: *std.Io.Writer) !void {
     const options = wire.options();
     const style = if (options.bits > 1) self.style.bus_style else self.style.wire_style;
 

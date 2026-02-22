@@ -677,7 +677,7 @@ fn add_missing_interface_constraints(self: *Box, interface: *Interface, default_
     interface.add_missing_constraints();
 }
 
-pub fn format(self: *Box, writer: *std.io.Writer) !void {
+pub fn format(self: *Box, writer: *std.Io.Writer) !void {
     try writer.print("Box ({t}): {s}\n", .{
         self.options.shape,
         self.options.class,
