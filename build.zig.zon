@@ -10,9 +10,10 @@
         },
     },
     .paths = .{
+        "zbox",
         "build.zig",
         "build.zig.zon",
         "zbox.zig",
-        "zbox",
+        "license",
     },
 }
