@@ -5,25 +5,25 @@ arena: std.heap.ArenaAllocator = std.heap.ArenaAllocator.init(std.heap.page_allo
 constraints: ShallowAutoHashMapUnmanaged(*const f64, Constraint) = .{},
 debug_value_names: ShallowAutoHashMapUnmanaged(*const anyopaque, Value_Name) = .{},
 
-labels: std.ArrayListUnmanaged(*Label) = .{},
+labels: std.ArrayList(*Label) = .empty,
 
-boxes: std.ArrayListUnmanaged(*Box) = .{},
+boxes: std.ArrayList(*Box) = .empty,
 
 // Note only the first segment of each wire is stored here;
 // iterate through the .next chains to find the other segments
-wires_h: std.ArrayListUnmanaged(*Wire_H) = .{},
-wires_v: std.ArrayListUnmanaged(*Wire_V) = .{},
+wires_h: std.ArrayList(*Wire_H) = .empty,
+wires_v: std.ArrayList(*Wire_V) = .empty,
 
-x_ref_clusters: std.ArrayListUnmanaged(*X_Ref_Cluster) = .{},
-y_ref_clusters: std.ArrayListUnmanaged(*Y_Ref_Cluster) = .{},
+x_ref_clusters: std.ArrayList(*X_Ref_Cluster) = .empty,
+y_ref_clusters: std.ArrayList(*Y_Ref_Cluster) = .empty,
 
-separators_h: std.ArrayListUnmanaged(*Separator_H) = .{},
-separators_v: std.ArrayListUnmanaged(*Separator_V) = .{},
+separators_h: std.ArrayList(*Separator_H) = .empty,
+separators_v: std.ArrayList(*Separator_V) = .empty,
 
-loose_values: std.ArrayListUnmanaged(*f64) = .{},
+loose_values: std.ArrayList(*f64) = .empty,
 
 // note this includes the interfaces inside X/Y_Ref_Clusters as well
-interfaces: std.ArrayListUnmanaged(*Interface) = .{},
+interfaces: std.ArrayList(*Interface) = .empty,
 
 const Value_Name = struct {
     name: []const u8,

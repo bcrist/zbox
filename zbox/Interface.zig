@@ -1,7 +1,7 @@
 // TODO consider alternative names for this struct that are more descriptive
 
 state: *Drawing_State,
-contents: std.ArrayListUnmanaged(*f64) = .{},
+contents: std.ArrayList(*f64) = .empty,
 spacing: f64 = values.uninitialized,
 span: Span = .{},
 

@@ -1,6 +1,6 @@
 /// A standard topological sort
 pub fn sort(arena: std.mem.Allocator, state: *const Drawing_State, constraints: []Constraint) !void {
-    var open_nodes = Open_Node_List.initCapacity(arena, constraints.len) catch @panic("OOM");
+    var open_nodes = std.ArrayList(*Node).initCapacity(arena, constraints.len) catch @panic("OOM");
     const nodes = init_nodes(arena, constraints, &open_nodes);
 
     var out_index: usize = 0;
@@ -32,7 +32,7 @@ pub fn sort(arena: std.mem.Allocator, state: *const Drawing_State, constraints: 
     }
 }
 
-fn init_nodes(arena: std.mem.Allocator, constraints: []Constraint, open_nodes: *Open_Node_List) []Node {
+fn init_nodes(arena: std.mem.Allocator, constraints: []Constraint, open_nodes: *std.ArrayList(*Node)) []Node {
     const nodes = arena.alloc(Node, constraints.len) catch @panic("OOM");
     var ptr_to_node = ShallowAutoHashMap(*const f64, *Node).init(arena);
 
@@ -126,7 +126,6 @@ const Node = struct {
 
 const log = std.log.scoped(.kahn);
 
-const Open_Node_List = std.ArrayListUnmanaged(*Node);
 const Constraint = @import("Constraint.zig");
 const Drawing_State = @import("Drawing_State.zig");
 const ShallowAutoHashMap = @import("deep_hash_map").ShallowAutoHashMap;
