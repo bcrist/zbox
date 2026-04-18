@@ -2,11 +2,11 @@
     .name = .zbox,
     .fingerprint = 0xd22e0ecc37bda7b5,
     .version = "1.3.0",
-    .minimum_zig_version = "0.16.0-dev.2626+0e3c6514a",
+    .minimum_zig_version = "0.16.0",
     .dependencies = .{
         .deep_hash_map = .{
-            .url = "git+https://github.com/bcrist/zig-deephashmap#ec22725ad1e4ea65488fe7c5bc1f2041d92bf87c",
-            .hash = "deep_hash_map-1.0.1-RLYshCUbAABnDZhPzE87HipEv7FG7ktpMSxLRxWvXuO7",
+            .url = "git+https://codeberg.org/bcrist/zig-deephashmap#da64d909973dddfa4649dda1140f3af0c2c7d4cb",
+            .hash = "deep_hash_map-1.0.1-RLYshKIgAADSXYf_IHDZrrXc9-jx-o-gJoviqNiuuS4-",
         },
     },
     .paths = .{
