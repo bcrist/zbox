@@ -59,7 +59,7 @@ pub fn add_debug_value_name(self: *Drawing_State, ptr: *const anyopaque, name: [
 }
 
 pub fn print(self: *Drawing_State, comptime fmt: []const u8, args: anytype) []const u8 {
-    return std.fmt.allocPrint(self.arena.allocator(), fmt, args) catch @panic("OOM");
+    return self.arena.allocator().print(fmt, args) catch @panic("OOM");
 }
 
 pub fn create_value(self: *Drawing_State, initial_value: f64, debug_name: []const u8, parent: ?*const anyopaque) *f64 {
