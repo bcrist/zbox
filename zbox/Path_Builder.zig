@@ -24,12 +24,12 @@ pub fn class(self: *Path_Builder, classname: []const u8) !void {
 
     if (self.cursor) |cursor| {
         if (cursor.last_command == '_') {
-            try self.writer.print(" {s}", .{ classname });
+            try self.writer.print(" {s}", .{classname});
             return;
         }
     }
 
-    try self.writer.print("\" class=\"{s}", .{ classname });
+    try self.writer.print("\" class=\"{s}", .{classname});
     self.cursor = .{
         .last_command = '_',
         .x = 0,
@@ -71,7 +71,7 @@ pub fn line_to(self: *Path_Builder, x: f64, y: f64) !void {
         }
 
         if (cursor.x == x) {
-            try self.writer.print("V {d} ", .{ y });
+            try self.writer.print("V {d} ", .{y});
             self.cursor = .{
                 .last_command = 'V',
                 .x = x,
@@ -81,7 +81,7 @@ pub fn line_to(self: *Path_Builder, x: f64, y: f64) !void {
         }
 
         if (cursor.y == y) {
-            try self.writer.print("H {d} ", .{ x });
+            try self.writer.print("H {d} ", .{x});
             self.cursor = .{
                 .last_command = 'H',
                 .x = x,
@@ -112,7 +112,7 @@ pub fn line_rel(self: *Path_Builder, dx: f64, dy: f64) !void {
         return;
     }
     if (dx == 0) {
-        try self.writer.print("v {d} ", .{ dy });
+        try self.writer.print("v {d} ", .{dy});
         self.cursor = .{
             .last_command = 'v',
             .x = current.x,
@@ -121,7 +121,7 @@ pub fn line_rel(self: *Path_Builder, dx: f64, dy: f64) !void {
         return;
     }
     if (dy == 0) {
-        try self.writer.print("h {d} ", .{ dx });
+        try self.writer.print("h {d} ", .{dx});
         self.cursor = .{
             .last_command = 'h',
             .x = current.x + dx,
@@ -142,11 +142,11 @@ const Arc_Options = struct {
     radius_x: ?f64 = null,
     radius_y: ?f64 = null,
     rotation_degrees: f64 = 0,
-    kind: enum (u1) {
+    kind: enum(u1) {
         small_arc = 0,
         large_arc = 1,
     } = .small_arc,
-    direction: enum (u1) {
+    direction: enum(u1) {
         ccw = 0,
         cw = 1,
     } = .cw,
@@ -167,8 +167,8 @@ pub fn arc_to(self: *Path_Builder, x: f64, y: f64, options: Arc_Options) !void {
                 radius_x,
                 radius_y,
                 options.rotation_degrees,
-                @intFromEnum(options.kind),
-                @intFromEnum(options.direction),
+                @backingInt(options.kind),
+                @backingInt(options.direction),
                 x,
                 y,
             });
@@ -188,8 +188,8 @@ pub fn arc_to(self: *Path_Builder, x: f64, y: f64, options: Arc_Options) !void {
         radius_x,
         radius_y,
         options.rotation_degrees,
-        @intFromEnum(options.kind),
-        @intFromEnum(options.direction),
+        @backingInt(options.kind),
+        @backingInt(options.direction),
         x,
         y,
     });
@@ -215,8 +215,8 @@ pub fn arc_rel(self: *Path_Builder, dx: f64, dy: f64, options: Arc_Options) !voi
             radius_x,
             radius_y,
             options.rotation_degrees,
-            @intFromEnum(options.kind),
-            @intFromEnum(options.direction),
+            @backingInt(options.kind),
+            @backingInt(options.direction),
             dx,
             dy,
         });
@@ -225,8 +225,8 @@ pub fn arc_rel(self: *Path_Builder, dx: f64, dy: f64, options: Arc_Options) !voi
             radius_x,
             radius_y,
             options.rotation_degrees,
-            @intFromEnum(options.kind),
-            @intFromEnum(options.direction),
+            @backingInt(options.kind),
+            @backingInt(options.direction),
             dx,
             dy,
         });
@@ -244,6 +244,5 @@ pub fn close(self: *Path_Builder) !void {
 }
 
 const Path_Builder = @This();
-
 
 const std = @import("std");

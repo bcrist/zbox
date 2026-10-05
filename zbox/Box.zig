@@ -508,23 +508,23 @@ pub fn add_missing_constraints(self: *Box) void {
     if (self._l) |interface| self.add_missing_interface_constraints(interface, &self._y.mid);
     if (self._lu) |interface| {
         const anchor = self.state.create_value(self._y.mid, "(_lu anchor)", self);
-        self.state.constrain_lerp(anchor, &self._y.begin, &self._y.mid, 1.0/3.0, "left upper interface center");
+        self.state.constrain_lerp(anchor, &self._y.begin, &self._y.mid, 1.0 / 3.0, "left upper interface center");
         self.add_missing_interface_constraints(interface, anchor);
     }
     if (self._ll) |interface| {
         const anchor = self.state.create_value(self._y.mid, "(_ll anchor)", self);
-        self.state.constrain_lerp(anchor, &self._y.end, &self._y.mid, 1.0/3.0, "left lower interface center");
+        self.state.constrain_lerp(anchor, &self._y.end, &self._y.mid, 1.0 / 3.0, "left lower interface center");
         self.add_missing_interface_constraints(interface, anchor);
     }
     if (self._r) |interface| self.add_missing_interface_constraints(interface, &self._y.mid);
     if (self._ru) |interface| {
         const anchor = self.state.create_value(self._y.mid, "(_ru anchor)", self);
-        self.state.constrain_lerp(anchor, &self._y.begin, &self._y.mid, 1.0/3.0, "right upper interface center");
+        self.state.constrain_lerp(anchor, &self._y.begin, &self._y.mid, 1.0 / 3.0, "right upper interface center");
         self.add_missing_interface_constraints(interface, anchor);
     }
     if (self._rl) |interface| {
         const anchor = self.state.create_value(self._y.mid, "(_rl anchor)", self);
-        self.state.constrain_lerp(anchor, &self._y.end, &self._y.mid, 1.0/3.0, "right lower interface center");
+        self.state.constrain_lerp(anchor, &self._y.end, &self._y.mid, 1.0 / 3.0, "right lower interface center");
         self.add_missing_interface_constraints(interface, anchor);
     }
     if (self._t) |interface| self.add_missing_interface_constraints(interface, &self._x.mid);
@@ -586,7 +586,7 @@ pub fn add_missing_constraints(self: *Box) void {
                     .src = spacing,
                     .scale = @floatFromInt(max_rows),
                     .offset = 0,
-                }}, "joiner default width");
+                } }, "joiner default width");
             }
             break :default_width 25;
         },
@@ -603,7 +603,7 @@ pub fn add_missing_constraints(self: *Box) void {
                             .src = &interface.spacing,
                             .scale = @floatFromInt(rows),
                             .offset = 20,
-                        }}, "mux default height");
+                        } }, "mux default height");
                     }
                 }
             }
@@ -618,7 +618,7 @@ pub fn add_missing_constraints(self: *Box) void {
                             .src = &interface.spacing,
                             .scale = @floatFromInt(rows),
                             .offset = 20,
-                        }}, "demux default height");
+                        } }, "demux default height");
                     }
                 }
             }
@@ -633,7 +633,7 @@ pub fn add_missing_constraints(self: *Box) void {
                             .src = &interface.spacing,
                             .scale = @floatFromInt(rows),
                             .offset = 0,
-                        }}, "logic gate default height");
+                        } }, "logic gate default height");
                     }
                 }
             }
@@ -662,7 +662,7 @@ pub fn add_missing_constraints(self: *Box) void {
                     .src = spacing,
                     .scale = @floatFromInt(max_rows),
                     .offset = 0,
-                }}, "joiner default height");
+                } }, "joiner default height");
             }
             break :default_height 25;
         },

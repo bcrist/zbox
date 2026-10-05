@@ -13,7 +13,7 @@ pub fn push(self: *Interface) *f64 {
 
 pub fn flip(self: *Interface) void {
     const items = self.contents.items;
-    for (0..items.len/2) |i| {
+    for (0..items.len / 2) |i| {
         const j = items.len - i - 1;
         const temp = items[i];
         items[i] = items[j];
@@ -24,7 +24,7 @@ pub fn flip(self: *Interface) void {
 pub fn add_missing_constraints(self: *Interface) void {
     var spaces: usize = 0;
     for (0.., self.contents.items) |i, item| {
-        self.state.add_debug_value_name(item, self.state.print("[{d}]", .{ i }), self);
+        self.state.add_debug_value_name(item, self.state.print("[{d}]", .{i}), self);
 
         if (values.is_uninitialized(item.*)) {
             spaces += 1;

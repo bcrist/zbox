@@ -9,7 +9,7 @@ pub fn init(gpa: std.mem.Allocator) *Drawing {
     self.* = .{ .state = .{
         .drawing = self,
         .gpa = gpa,
-    }};
+    } };
     return self;
 }
 pub fn deinit(self: *Drawing) void {
@@ -169,8 +169,8 @@ pub fn render_svg(self: *Drawing, writer: *std.Io.Writer) !void {
         \\<svg viewBox="{d} {d} {d} {d}" width="{d}" height="{d}" xmlns="http://www.w3.org/2000/svg">
         \\
     , .{
-        view.left orelse 0, view.top orelse 0,
-        view.width(), view.height(),
+        view.left orelse 0,                     view.top orelse 0,
+        view.width(),                           view.height(),
         view.width() * self.style.global_scale, view.height() * self.style.global_scale,
     });
 
@@ -178,14 +178,14 @@ pub fn render_svg(self: *Drawing, writer: *std.Io.Writer) !void {
         try writer.print(
             \\<title>{s}</title>
             \\
-        , .{ self.title });
+        , .{self.title});
     }
 
     if (self.desc.len > 0) {
         try writer.print(
             \\<desc>{s}</desc>
             \\
-        , .{ self.desc });
+        , .{self.desc});
     }
 
     try writer.print(
@@ -201,7 +201,7 @@ pub fn render_svg(self: *Drawing, writer: *std.Io.Writer) !void {
             \\<line x1="{d}" y1="{d}" x2="{d}" y2="{d}" class="{s} sep"/>
             \\
         , .{
-            view.left.?, s._y,
+            view.left.?,  s._y,
             view.right.?, s._y,
             s.class,
         });
@@ -211,8 +211,8 @@ pub fn render_svg(self: *Drawing, writer: *std.Io.Writer) !void {
             \\<line x1="{d}" y1="{d}" x2="{d}" y2="{d}" class="{s} sep"/>
             \\
         , .{
-            s._x, view.top.?,
-            s._x, view.bottom.?,
+            s._x,    view.top.?,
+            s._x,    view.bottom.?,
             s.class,
         });
     }
@@ -266,8 +266,8 @@ fn render_svg_box(self: *Drawing, b: *Box, writer: *std.Io.Writer) !void {
                 try pb.line_to(b._x.begin, b._y.mid + dy / 2);
             }
             try pb.line_to(b._x.begin, b._y.end + dy);
-            try pb.line_to(b._x.end,   b._y.end - dy);
-            try pb.line_to(b._x.end,   b._y.begin + dy);
+            try pb.line_to(b._x.end, b._y.end - dy);
+            try pb.line_to(b._x.end, b._y.begin + dy);
             try pb.close();
             try pb.class("box");
             try pb.class(@tagName(b.options.shape));
@@ -280,8 +280,8 @@ fn render_svg_box(self: *Drawing, b: *Box, writer: *std.Io.Writer) !void {
             var pb = try Path_Builder.init(writer);
             try pb.move_to(b._x.begin, b._y.begin + dy);
             try pb.line_to(b._x.begin, b._y.end - dy);
-            try pb.line_to(b._x.end,   b._y.end + dy);
-            try pb.line_to(b._x.end,   b._y.begin - dy);
+            try pb.line_to(b._x.end, b._y.end + dy);
+            try pb.line_to(b._x.end, b._y.begin - dy);
             try pb.close();
             try pb.class("box");
             try pb.class(@tagName(b.options.shape));
@@ -326,11 +326,11 @@ fn render_svg_box(self: *Drawing, b: *Box, writer: *std.Io.Writer) !void {
             try pb.close();
 
             if (b.options.shape == .xor) {
-                try pb.move_to(b._x.begin - dx*3, b._y.end);
-                try pb.arc_to(b._x.begin - dx*2, b._y.mid, .{ .radius = b._y.len * input_arc_mult, .direction = .ccw });
-                try pb.arc_to(b._x.begin - dx*3, b._y.begin, .{ .radius = b._y.len * input_arc_mult, .direction = .ccw });
-                try pb.arc_to(b._x.begin - dx*2, b._y.mid, .{ .radius = b._y.len * input_arc_mult, .direction = .cw });
-                try pb.arc_to(b._x.begin - dx*3, b._y.end, .{ .radius = b._y.len * input_arc_mult, .direction = .cw });
+                try pb.move_to(b._x.begin - dx * 3, b._y.end);
+                try pb.arc_to(b._x.begin - dx * 2, b._y.mid, .{ .radius = b._y.len * input_arc_mult, .direction = .ccw });
+                try pb.arc_to(b._x.begin - dx * 3, b._y.begin, .{ .radius = b._y.len * input_arc_mult, .direction = .ccw });
+                try pb.arc_to(b._x.begin - dx * 2, b._y.mid, .{ .radius = b._y.len * input_arc_mult, .direction = .cw });
+                try pb.arc_to(b._x.begin - dx * 3, b._y.end, .{ .radius = b._y.len * input_arc_mult, .direction = .cw });
             }
 
             try pb.class("box");
@@ -343,11 +343,11 @@ fn render_svg_box(self: *Drawing, b: *Box, writer: *std.Io.Writer) !void {
 
             var pb = try Path_Builder.init(writer);
             try pb.move_to(b._x.begin, b._y.begin - dy);
-            try pb.line_to(b._x.mid,   b._y.begin);
-            try pb.line_to(b._x.end,   b._y.begin - dy);
+            try pb.line_to(b._x.mid, b._y.begin);
+            try pb.line_to(b._x.end, b._y.begin - dy);
 
-            try pb.line_to(b._x.end,   b._y.end + dy);
-            try pb.line_to(b._x.mid,   b._y.end);
+            try pb.line_to(b._x.end, b._y.end + dy);
+            try pb.line_to(b._x.mid, b._y.end);
             try pb.line_to(b._x.begin, b._y.end + dy);
             try pb.close();
             try pb.class("box");
@@ -377,10 +377,9 @@ fn render_svg_box(self: *Drawing, b: *Box, writer: *std.Io.Writer) !void {
                     \\<rect x="{d}" y="{d}" width="{d}" height="{d}" class="box {s} {s}"/>
                     \\
                 , .{
-                    b._x.min, b._y.min,
-                    b._x.len, b._y.len,
-                    @tagName(b.options.shape),
-                    b.options.class,
+                    b._x.min,                  b._y.min,
+                    b._x.len,                  b._y.len,
+                    @tagName(b.options.shape), b.options.class,
                 });
             }
         },
@@ -409,19 +408,18 @@ fn render_svg_label(lx: f64, ly: f64, text: []const u8, options: Label.Options, 
     try writer.print(
         \\<text x="{d}" y="{d}" class="label _{s}{s}
     , .{
-        lx, ly,
-        @tagName(options.baseline)[0..1],
-        @tagName(options.alignment)[0..1],
+        lx,                               ly,
+        @tagName(options.baseline)[0..1], @tagName(options.alignment)[0..1],
     });
-    if (options.class.len > 0) try writer.print(" {s}", .{ options.class });
-    if (options._class1.len > 0) try writer.print(" {s}", .{ options._class1 });
-    if (options._class2.len > 0) try writer.print(" {s}", .{ options._class2 });
+    if (options.class.len > 0) try writer.print(" {s}", .{options.class});
+    if (options._class1.len > 0) try writer.print(" {s}", .{options._class1});
+    if (options._class2.len > 0) try writer.print(" {s}", .{options._class2});
 
     if (options.angle != 0) {
         try writer.print(
             \\" transform-origin="{d} {d}" transform="rotate({d})"
         , .{
-            lx, ly,
+            lx,            ly,
             options.angle,
         });
     } else {
@@ -431,13 +429,13 @@ fn render_svg_label(lx: f64, ly: f64, text: []const u8, options: Label.Options, 
     if (options.size != 0) {
         try writer.print(
             \\ font-size="{d}"
-        , .{ options.size });
+        , .{options.size});
     }
 
     try writer.writeByte('>');
 
     var hide = false;
-    var iter = std.unicode.Wtf8Iterator {
+    var iter = std.unicode.Wtf8Iterator{
         .bytes = text,
         .i = 0,
     };
@@ -447,11 +445,7 @@ fn render_svg_label(lx: f64, ly: f64, text: []const u8, options: Label.Options, 
             continue;
         }
         if (!hide) {
-            if (cp == '<') try writer.writeAll("&lt;")
-            else if (cp == '>') try writer.writeAll("&gt;")
-            else if (cp == '&') try writer.writeAll("&amp;")
-            else if (cp < ' ' or cp >= 0x7F) try writer.print("&#{d};", .{ cp })
-            else try writer.writeByte(@intCast(cp));
+            if (cp == '<') try writer.writeAll("&lt;") else if (cp == '>') try writer.writeAll("&gt;") else if (cp == '&') try writer.writeAll("&amp;") else if (cp < ' ' or cp >= 0x7F) try writer.print("&#{d};", .{cp}) else try writer.writeByte(@intCast(cp));
         }
     }
     try writer.writeAll("</text>\n");
@@ -523,8 +517,8 @@ fn render_svg_wire(self: *Drawing, wire: wires.Wire_Ref, writer: *std.Io.Writer)
         if (segment.bit_mark()) |f| {
             const begin = segment.begin();
             const end = segment.end();
-            const cx = (1-f)*begin._x.* + f*end._x.*;
-            const cy = (1-f)*begin._y.* + f*end._y.*;
+            const cx = (1 - f) * begin._x.* + f * end._x.*;
+            const cy = (1 - f) * begin._y.* + f * end._y.*;
 
             const x0 = cx - style.bit_mark_length / 2;
             const x1 = cx + style.bit_mark_length / 2;
@@ -536,11 +530,11 @@ fn render_svg_wire(self: *Drawing, wire: wires.Wire_Ref, writer: *std.Io.Writer)
                 \\<line x1="{d}" y1="{d}" x2="{d}" y2="{d}" class="wire bitmark
             , .{ x0, y0, x1, y1 });
             if (options.bits > 1) try writer.writeAll(" bus");
-            if (options.class.len > 0) try writer.print(" {s}", .{ options.class });
+            if (options.class.len > 0) try writer.print(" {s}", .{options.class});
             try writer.writeAll("\"/>\n");
 
             var buf: [64]u8 = undefined;
-            const text = try std.fmt.bufPrint(&buf, "{}", .{ options.bits });
+            const text = try std.fmt.bufPrint(&buf, "{}", .{options.bits});
 
             switch (segment) {
                 .H => try render_svg_label(cx, cy + style.bit_mark_label_offset_y, text, .{
@@ -572,7 +566,7 @@ fn render_svg_wire(self: *Drawing, wire: wires.Wire_Ref, writer: *std.Io.Writer)
                 style.junction_radius,
             });
             if (options.bits > 1) try writer.writeAll(" bus");
-            if (options.class.len > 0) try writer.print(" {s}", .{ options.class });
+            if (options.class.len > 0) try writer.print(" {s}", .{options.class});
             try writer.writeAll("\"/>\n");
         },
         .invert => {
@@ -594,11 +588,10 @@ fn render_svg_wire(self: *Drawing, wire: wires.Wire_Ref, writer: *std.Io.Writer)
             });
 
             if (options.bits > 1) try writer.writeAll(" bus");
-            if (options.class.len > 0) try writer.print(" {s}", .{ options.class });
+            if (options.class.len > 0) try writer.print(" {s}", .{options.class});
             try writer.writeAll("\"/>\n");
         },
     }
-    
 
     switch (end_kind) {
         .none => {},
@@ -613,7 +606,7 @@ fn render_svg_wire(self: *Drawing, wire: wires.Wire_Ref, writer: *std.Io.Writer)
                 style.junction_radius,
             });
             if (options.bits > 1) try writer.writeAll(" bus");
-            if (options.class.len > 0) try writer.print(" {s}", .{ options.class });
+            if (options.class.len > 0) try writer.print(" {s}", .{options.class});
             try writer.writeAll("\"/>\n");
         },
         .invert => {
@@ -635,7 +628,7 @@ fn render_svg_wire(self: *Drawing, wire: wires.Wire_Ref, writer: *std.Io.Writer)
             });
 
             if (options.bits > 1) try writer.writeAll(" bus");
-            if (options.class.len > 0) try writer.print(" {s}", .{ options.class });
+            if (options.class.len > 0) try writer.print(" {s}", .{options.class});
             try writer.writeAll("\"/>\n");
         },
     }
@@ -655,7 +648,7 @@ fn render_svg_arrowhead_path(dx: f64, dy: f64, wire_style: Style.Wire_Style, pb:
     normal_y *= wire_style.arrow_width;
 
     try pb.move_rel(-tangent_x - normal_x, -tangent_y - normal_y);
-    try pb.line_rel( tangent_x + normal_x,  tangent_y + normal_y);
+    try pb.line_rel(tangent_x + normal_x, tangent_y + normal_y);
     try pb.line_rel(-tangent_x + normal_x, -tangent_y + normal_y);
 }
 

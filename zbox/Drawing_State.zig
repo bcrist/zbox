@@ -167,7 +167,7 @@ pub fn create_x_ref_cluster(self: *Drawing_State, parent: ?*const anyopaque) *X_
     const item = arena.create(X_Ref_Cluster) catch @panic("OOM");
     item.* = .{ .interface = .{
         .state = self,
-    }};
+    } };
     self.x_ref_clusters.append(self.gpa, item) catch @panic("OOM");
     self.interfaces.append(self.gpa, &item.interface) catch @panic("OOM");
     item.set_debug_name("X_Ref_Cluster", parent);
@@ -179,7 +179,7 @@ pub fn create_y_ref_cluster(self: *Drawing_State, parent: ?*const anyopaque) *Y_
     const item = arena.create(Y_Ref_Cluster) catch @panic("OOM");
     item.* = .{ .interface = .{
         .state = self,
-    }};
+    } };
     self.y_ref_clusters.append(self.gpa, item) catch @panic("OOM");
     self.interfaces.append(self.gpa, &item.interface) catch @panic("OOM");
     item.set_debug_name("Y_Ref_Cluster", parent);
@@ -269,14 +269,14 @@ pub fn constrain_offset(self: *Drawing_State, dest: *f64, src: *const f64, offse
         .src = src,
         .offset = offset,
         .scale = 1,
-    }}, debug_text);
+    } }, debug_text);
 }
 
 pub fn constrain_scaled_offset(self: *Drawing_State, dest: *f64, src: *const f64, offset: *const f64, offset_scale: f64, debug_text: []const u8) void {
     self.constrain(dest, .{ .scaled_offset = .{
         .operands = .{ src, offset },
         .k = offset_scale,
-    }}, debug_text);
+    } }, debug_text);
 }
 
 pub fn constrain_scale(self: *Drawing_State, dest: *f64, src: *const f64, scale: f64, debug_text: []const u8) void {
@@ -284,18 +284,18 @@ pub fn constrain_scale(self: *Drawing_State, dest: *f64, src: *const f64, scale:
         .src = src,
         .offset = 0,
         .scale = scale,
-    }}, debug_text);
+    } }, debug_text);
 }
 
 pub fn constrain_midpoint(self: *Drawing_State, dest: *f64, v0: *const f64, v1: *const f64, debug_text: []const u8) void {
-    self.constrain(dest, .{ .midpoint = .{ v0, v1 }}, debug_text);
+    self.constrain(dest, .{ .midpoint = .{ v0, v1 } }, debug_text);
 }
 
 pub fn constrain_lerp(self: *Drawing_State, dest: *f64, v0: *const f64, v1: *const f64, f: f64, debug_text: []const u8) void {
     self.constrain(dest, .{ .lerp = .{
         .operands = .{ v0, v1 },
         .k = f,
-    }}, debug_text);
+    } }, debug_text);
 }
 
 pub fn remove_constraint(self: *Drawing_State, val: *f64) void {
@@ -310,7 +310,7 @@ pub fn format(self: *Drawing_State, writer: *std.Io.Writer) error{WriteFailed}!v
         try c.format(writer);
     }
 
-     for (self.wires_h.items) |w| {
+    for (self.wires_h.items) |w| {
         try w.format(writer);
     }
     for (self.wires_v.items) |w| {

@@ -7,8 +7,7 @@ test "example" {
 
     const b = d.box(.{ .label = "Hello\nWorld" })
         .top_label(.left, "ASDF")
-        .bottom_label(.right, "123abc")
-        ;
+        .bottom_label(.right, "123abc");
 
     _ = b.size(300, 400);
 
@@ -21,13 +20,11 @@ test "example" {
     _ = asdf.turn()
         .turn_at_offset(b.top(), -50)
         .turn_at_offset(b.right(), 50)
-        .turn_and_end_at(b.right_side("asdf"))
-        ;
+        .turn_and_end_at(b.right_side("asdf"));
 
     _ = asdf.turn().turn().y()
         .wire(.{ .dir = .junction_begin })
-        .end_at_point(b.top_side("asdf"))
-        ;
+        .end_at_point(b.top_side("asdf"));
 
     const small = d.box(.{ .shape = .small, .label = "^1" });
     _ = small.top_left().attach_to_offset(b.top_right(), 300, 0);
@@ -51,7 +48,6 @@ test "example" {
 
     _ = b2.left().attach_to_offset(b.right(), 150);
     _ = b2.bottom().attach_to(b.bottom());
-
 
     const halfway = d.some_x().attach_between(b.right(), b2.left(), 0.5);
 
@@ -92,8 +88,7 @@ test "example" {
     const bus = d.point()
         .attach_to_offset(b.bottom_left(), 0, 100)
         .wire_h(.{ .bits = 16 })
-        .bit_mark()
-        ;
+        .bit_mark();
 
     const bus2 = bus.continue_at(b.right()).end_at(b3.right());
 
@@ -111,7 +106,6 @@ test "example" {
     _ = b3.bottom_side("XYZ").wire_v(.{ .dir = .forward }).end_at(bus.y());
     _ = b3.bottom_side("123").wire_v(.{ .dir = .reverse }).end_at(bus.y());
 
-
     const bowtie = d.box(.{ .shape = .bowtie });
     _ = bowtie.middle_center().anchor_at(400, 600);
 
@@ -122,7 +116,7 @@ test "example" {
     // _ = and_gate.left_side("").wire_h(.{}).length(-30);
     // _ = and_gate.left_side("").wire_h(.{}).length(-30);
 
-    const xor_gate = d.box(.{ .shape = .@"xor" });
+    const xor_gate = d.box(.{ .shape = .xor });
     _ = xor_gate.middle_center().anchor_at(100, 600);
     _ = xor_gate.left_side("").wire_h(.{}).length(-30);
     _ = xor_gate.left_side("").wire_h(.{}).length(-30);

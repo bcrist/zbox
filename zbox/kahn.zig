@@ -78,9 +78,9 @@ fn init_nodes(arena: std.mem.Allocator, constraints: []Constraint, open_nodes: *
 fn log_cycle(node: *Node, state: *const Drawing_State, visited: *std.ArrayList(*Node)) bool {
     for (0.., visited.items) |i, antecedent| {
         if (node == antecedent) {
-            log.err("Cycle: {f}", .{ antecedent.constraint.formatter(state) });
+            log.err("Cycle: {f}", .{antecedent.constraint.formatter(state)});
             for (visited.items[i + 1 ..]) |s| {
-                log.err("    -> {f}", .{ s.constraint.formatter(state) });
+                log.err("    -> {f}", .{s.constraint.formatter(state)});
             }
             log.err("    -> (repeat)", .{});
             return true;
@@ -121,7 +121,6 @@ const Node = struct {
         self.successors.len += 1;
         self.successors[self.successors.len - 1] = successor;
     }
-
 };
 
 const log = std.log.scoped(.kahn);

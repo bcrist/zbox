@@ -12,7 +12,7 @@ pub const Wire_Group = struct {
         .wires = .empty,
         .labels = .empty,
     };
-    
+
     pub fn deinit(self: *Wire_Group, gpa: std.mem.Allocator) void {
         self.wires.deinit(gpa);
         self.labels.deinit(gpa);
@@ -107,7 +107,7 @@ fn process_wire(self: *Wire_Groups, wire: Wire_Ref) !void {
 
 fn process_wire_junctions(self: *Wire_Groups, wire: Wire_Ref) !void {
     const dir = wire.options().dir;
-    
+
     var final_segment = wire;
     var iter = wire.iterator();
     while (iter.next()) |segment| {

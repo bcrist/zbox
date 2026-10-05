@@ -17,7 +17,7 @@ pub fn formatter(self: Constraint, state: *const Drawing_State) std.fmt.Alt(Form
     return .{ .data = .{
         .constraint = self,
         .state = state,
-    }};
+    } };
 }
 
 fn debug_ptr(state: *const Drawing_State, ptr: *const anyopaque, w: *std.Io.Writer) !void {
@@ -28,7 +28,7 @@ fn debug_ptr(state: *const Drawing_State, ptr: *const anyopaque, w: *std.Io.Writ
         }
         try w.writeAll(name.name);
     } else {
-        try w.print("#{X:0>16}", .{ @intFromPtr(ptr) });
+        try w.print("#{X:0>16}", .{@intFromPtr(ptr)});
     }
 }
 
@@ -56,11 +56,7 @@ pub const Op = union(enum) {
 
     pub fn clone(self: Op, allocator: std.mem.Allocator) Op {
         switch (self) {
-            .copy,
-            .offset_and_scale, .scale_and_offset,
-            .scaled_difference, .scaled_offset, .lerp, 
-            .difference, .midpoint, .sum2, .min2, .max2
-                => return self,
+            .copy, .offset_and_scale, .scale_and_offset, .scaled_difference, .scaled_offset, .lerp, .difference, .midpoint, .sum2, .min2, .max2 => return self,
 
             .sum => |ptrs| return .{ .sum = allocator.dupe(*const f64, ptrs) catch @panic("OOM") },
             .product => |ptrs| return .{ .product = allocator.dupe(*const f64, ptrs) catch @panic("OOM") },
@@ -76,7 +72,10 @@ pub const Op = union(enum) {
         switch (self) {
             .copy => |other| try debug_ptr(state, other, w),
             .offset_and_scale, .scale_and_offset => |info| try debug_ptr(state, info.src, w),
-            .scaled_difference, .scaled_offset, .lerp, => |info| {
+            .scaled_difference,
+            .scaled_offset,
+            .lerp,
+            => |info| {
                 try w.writeAll("\n                        [0]: ");
                 try debug_ptr(state, info.operands[0], w);
                 try w.writeAll("\n                        [1]: ");
@@ -90,7 +89,7 @@ pub const Op = union(enum) {
             },
             .sum, .product, .mean, .min, .max => |ptrs| {
                 for (0.., ptrs) |i, ptr| {
-                    try w.print("\n                        [{d}]: ", .{ i });
+                    try w.print("\n                        [{d}]: ", .{i});
                     try debug_ptr(state, ptr, w);
                 }
             },

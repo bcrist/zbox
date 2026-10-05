@@ -53,7 +53,7 @@ pub fn add_missing_constraints(self: *Span, state: *Drawing_State, mid: f64, del
             self.default_delta(state);
         } else {
             if (values.is_uninitialized(self.delta)) self.delta = delta;
-            state.constrain(&self.end, .{ .sum2 = .{ &self.begin, &self.delta }}, "span end from begin/delta");
+            state.constrain(&self.end, .{ .sum2 = .{ &self.begin, &self.delta } }, "span end from begin/delta");
             self.default_mid(state);
         }
     } else if (!values.is_uninitialized(self.end)) {
@@ -62,7 +62,7 @@ pub fn add_missing_constraints(self: *Span, state: *Drawing_State, mid: f64, del
             self.default_delta(state);
         } else {
             if (values.is_uninitialized(self.delta)) self.delta = delta;
-            state.constrain(&self.begin, .{ .difference = .{ &self.end, &self.delta }}, "span begin from end/delta");
+            state.constrain(&self.begin, .{ .difference = .{ &self.end, &self.delta } }, "span begin from end/delta");
             self.default_mid(state);
         }
     } else {
@@ -72,13 +72,13 @@ pub fn add_missing_constraints(self: *Span, state: *Drawing_State, mid: f64, del
         state.constrain_scaled_offset(&self.end, &self.mid, &self.delta, 0.5, "span end from mid/delta");
     }
 
-    state.constrain(&self.min, .{ .min2 = .{ &self.begin, &self.end }}, "span min from begin/end");
-    state.constrain(&self.max, .{ .max2 = .{ &self.begin, &self.end }}, "span max from begin/end");
-    state.constrain(&self.len, .{ .difference = .{ &self.max, &self.min }}, "span len from max/min");
+    state.constrain(&self.min, .{ .min2 = .{ &self.begin, &self.end } }, "span min from begin/end");
+    state.constrain(&self.max, .{ .max2 = .{ &self.begin, &self.end } }, "span max from begin/end");
+    state.constrain(&self.len, .{ .difference = .{ &self.max, &self.min } }, "span len from max/min");
 }
 
 fn default_delta(self: *Span, state: *Drawing_State) void {
-    state.constrain(&self.delta, .{ .difference = .{ &self.end, &self.begin }}, "default span delta");
+    state.constrain(&self.delta, .{ .difference = .{ &self.end, &self.begin } }, "default span delta");
 }
 
 fn default_mid(self: *Span, state: *Drawing_State) void {
@@ -88,7 +88,7 @@ fn default_mid(self: *Span, state: *Drawing_State) void {
 pub fn format(self: *Span, writer: *std.Io.Writer) error{WriteFailed}!void {
     try writer.print("begin: {d}   mid: {d}   end: {d}   delta: {d}   min: {d}   max: {d}   len: {d}\n", .{
         self.begin, self.mid, self.end, self.delta,
-        self.min, self.max, self.len,
+        self.min,   self.max, self.len,
     });
 }
 
@@ -102,7 +102,6 @@ pub fn set_debug_name(self: *Span, state: *Drawing_State, debug_name: []const u8
     state.add_debug_value_name(&self.max, "max", self);
     state.add_debug_value_name(&self.len, "len", self);
 }
-
 
 const Span = @This();
 const Drawing_State = @import("Drawing_State.zig");

@@ -51,8 +51,8 @@ pub fn format(self: *Label, writer: *std.Io.Writer) error{WriteFailed}!void {
         self.options.baseline,
         self.text,
     });
-    try writer.print("   x: {d}\n", .{ self._x });
-    try writer.print("   y: {d}\n", .{ self._y });
+    try writer.print("   x: {d}\n", .{self._x});
+    try writer.print("   y: {d}\n", .{self._y});
 }
 
 pub fn set_debug_name(self: *Label, debug_name: []const u8, parent: ?*const anyopaque) void {
